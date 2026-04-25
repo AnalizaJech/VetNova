@@ -19,17 +19,17 @@
                     <div class="avatar placeholder">
                         <div class="bg-neutral text-neutral-content rounded-full w-10">
                             <span class="text-xl">
-                                @if($mascota->especie === 'Perro') 🐶 
-                                @elseif($mascota->especie === 'Gato') 🐱 
-                                @elseif($mascota->especie === 'Ave') 🦜 
-                                @else 🐾 @endif
+                                @if($mascota->especie === 'Perro') <x-icon name="o-star" class="w-6 h-6" />
+                                @elseif($mascota->especie === 'Gato') <x-icon name="o-moon" class="w-6 h-6" />
+                                @elseif($mascota->especie === 'Ave') <x-icon name="o-paper-airplane" class="w-6 h-6" />
+                                @else <x-icon name="o-heart" class="w-6 h-6" /> @endif
                             </span>
                         </div>
                     </div>
                     <div>
                         <div class="font-bold text-base-content">{{ $mascota->nombre }}</div>
                         <div class="text-xs text-base-content/60 flex items-center gap-1">
-                            @if($mascota->sexo === 'M') ♂️ Macho @else ♀️ Hembra @endif
+                            @if($mascota->sexo === 'M') <x-icon name="o-user" class="w-3 h-3 text-info inline" /> Macho @else <x-icon name="o-user" class="w-3 h-3 text-pink-500 inline" /> Hembra @endif
                             @if($mascota->edad_readable !== 'Desconocida')
                                 &bull; {{ $mascota->edad_readable }}
                             @endif

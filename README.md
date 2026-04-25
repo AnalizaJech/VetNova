@@ -25,8 +25,8 @@ Sigue estos pasos para desplegar el proyecto localmente.
 
 ### 1. Clonar e Instalar Dependencias
 ```bash
-git clone <tu-repositorio> vetnova
-cd vetnova
+git clone https://github.com/AnalizaJech/VetNova.git
+cd VetNova
 composer install
 npm install
 ```
@@ -63,7 +63,7 @@ php artisan migrate --seed
 
 ### Usuarios de Prueba
 Tras la migración, usa estas credenciales para entrar al sistema:
-- **Correo:** `admin@vetnova.com`
+- **Correo:** `admin@vetnova.pe`
 - **Contraseña:** `password`
 
 ## Compilar e Iniciar el Servidor
@@ -91,7 +91,15 @@ El sistema estará disponible en `http://localhost:8000`.
 - **Tickets Térmicos vía Web:** Se optó por usar `@media print` directo desde Blade en vez de librerías pesadas como DOMPDF, esto permite invocar a `window.print()` nativamente y adaptar tickets instantáneos perfectos para tiqueteras de 80mm.
 - **Facturación Inteligente:** Se diseñó el inventario incluyendo un flag `afecto_igv` a nivel de producto. De este modo, la Caja sabe exactamente qué cálculos tributarios enviar a Nubefact sin forzar a los administradores a conocer tecnicismos contables en su trabajo diario.
 
-## Futuras Mejoras 
-- Envío de recordatorios automáticos de vacunas por WhatsApp (utilizando Twilio).
-- Generación de reportes PDF mensuales para los gerentes de las clínicas.
-- Módulo avanzado de inventario con control de lotes y fechas de vencimiento de medicamentos.
+## 🏥 Módulos Principales
+1. **Punto de Venta (Caja) y Facturación Inteligente**: Integración con Nubefact, cálculo de IGV, control de caja y visor de historial de facturación con reimpresión de tickets térmicos.
+2. **Historias Clínicas y Triaje**: Registro detallado por consulta, subida de archivos (Radiografías) y emisión de recetas en PDF.
+3. **Control de Vacunas**: Calendario de vacunación y control de dosis.
+4. **Inventario Híbrido**: Control dual de "Productos" (con descuento de stock en caja) y "Servicios" (Consultas, Baños).
+5. **Hospitalización (Internamiento)**: Panel de control visual de camas, bitácora de evolución médica (notas cronológicas) y altas médicas.
+6. **Centro de Recordatorios**: Panel automatizado para gestionar las citas y vacunas pendientes del día y enviar notificaciones vía WhatsApp/SMS integrables con Twilio.
+7. **Reportes y Analíticas**: Dashboard gerencial con Chart.js para medir ingresos, estado de atenciones y top de ventas en tiempo real.
+
+## 🚀 Futuras Mejoras 
+- Portal de auto-servicio para que los clientes vean las recetas de sus mascotas.
+- Integración contable para multi-cajas simultáneas.

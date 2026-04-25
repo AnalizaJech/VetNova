@@ -18,6 +18,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/vacunas', \App\Livewire\Vacunas\Index::class)->name('vacunas');
     Route::get('/inventario', \App\Livewire\Inventario\Index::class)->name('inventario');
     Route::get('/caja', \App\Livewire\Caja\Index::class)->name('caja');
+    Route::get('/facturacion', \App\Livewire\Facturacion\Index::class)->name('facturacion');
+    Route::get('/reportes', \App\Livewire\Reportes\Index::class)->name('reportes');
+    Route::get('/hospitalizacion', \App\Livewire\Hospitalizacion\Index::class)->name('hospitalizacion');
+    Route::get('/recordatorios', \App\Livewire\Recordatorios\Index::class)->name('recordatorios');
     Route::get('/ventas/{venta}/ticket', [\App\Http\Controllers\TicketController::class, 'show'])->name('ventas.ticket');
 
     Route::post('/logout', function () {

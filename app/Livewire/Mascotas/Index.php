@@ -13,13 +13,13 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Mary\Traits\Toast;
+use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
 #[Title('Mascotas — VetNova')]
 class Index extends Component
 {
-    use WithPagination, Toast;
+    use WithPagination, AlertModal;
 
     // Búsqueda en tabla
     public string $search = '';
@@ -228,3 +228,5 @@ class Index extends Component
         ]);
     }
 }
+
+

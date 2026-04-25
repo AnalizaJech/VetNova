@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="vetnova">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -9,14 +9,27 @@
     <title>{{ $title ?? 'VetNova' }}</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>🐾</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M19 10.5h-5.5V5a1.5 1.5 0 0 0-3 0v5.5H5a1.5 1.5 0 0 0 0 3h5.5V19a1.5 1.5 0 0 0 3 0v-5.5H19a1.5 1.5 0 0 0 0-3z'/></svg>">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen font-sans antialiased bg-base-200/50">
 
-    {{-- Toast global de Mary UI --}}
-    <x-toast />
+    {{-- SweetAlert2 CDN para Modales de Avisos --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('swal', function(e) {
+            let data = e.detail[0];
+            Swal.fire({
+                icon: data.icon,
+                title: data.title,
+                text: data.text,
+                background: '#1d232a', // Dark theme background
+                color: '#a6adbb',      // Dark theme text
+                confirmButtonColor: '#10b981', // Success color
+            });
+        });
+    </script>
 
     {{-- Layout principal con sidebar colapsable de Mary UI --}}
     <x-main full-width>
@@ -58,15 +71,15 @@
                 <x-menu-sub title="Operaciones" icon="o-cog-6-tooth">
                     <x-menu-item title="Inventario" icon="o-cube" link="{{ route('inventario') }}" />
                     <x-menu-item title="Punto de Venta" icon="o-banknotes" link="{{ route('caja') }}" badge="POS" badge-classes="badge-success badge-sm" />
-                    <x-menu-item title="Facturación" icon="o-document-text" link="#" />
-                    <x-menu-item title="Hospitalización" icon="o-building-office-2" link="#" />
+                    <x-menu-item title="Facturación" icon="o-document-text" link="{{ route('facturacion') }}" />
+                    <x-menu-item title="Hospitalización" icon="o-building-office-2" link="{{ route('hospitalizacion') }}" />
                 </x-menu-sub>
 
                 <x-menu-separator />
 
                 {{-- Notificaciones y reportes --}}
-                <x-menu-item title="Recordatorios" icon="o-bell" link="/recordatorios" />
-                <x-menu-item title="Reportes" icon="o-chart-bar" link="/reportes" />
+                <x-menu-item title="Recordatorios" icon="o-bell" link="{{ route('recordatorios') }}" />
+                <x-menu-item title="Reportes" icon="o-chart-bar" link="{{ route('reportes') }}" />
 
                 @can('configuracion.ver')
                     <x-menu-separator />
@@ -79,7 +92,7 @@
             <div class="mt-auto border-t border-white/10 px-4 py-4">
                 <div class="flex items-center gap-3">
                     <div class="avatar placeholder">
-                        <div class="bg-primary/20 text-primary rounded-full w-9">
+                        <div class="bg-primary/20 text-primary rounded-full w-9 flex items-center justify-center">
                             <span class="text-sm font-bold">
                                 {{ substr(auth()->user()->name ?? 'U', 0, 1) }}
                             </span>
@@ -110,8 +123,6 @@
                 </x-slot:brand>
 
                 <x-slot:actions>
-                    {{-- Toggle dark/light mode --}}
-                    <x-theme-toggle class="btn btn-ghost btn-sm" />
 
                     {{-- Botón de logout --}}
                     <form method="POST" action="{{ route('logout') }}" class="inline">

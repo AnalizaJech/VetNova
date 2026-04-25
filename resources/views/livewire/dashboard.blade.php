@@ -2,7 +2,7 @@
     {{-- Saludo --}}
     <div class="mb-8">
         <h1 class="text-3xl font-bold font-heading text-base-content tracking-tight">
-            ¡Hola, {{ auth()->user()->name }}! 👋
+            ¡Hola, {{ auth()->user()->name }}! <x-icon name="o-sparkles" class="w-8 h-8 text-warning inline-block" />
         </h1>
         <p class="text-base-content/60">Aquí tienes el resumen de tu clínica de hoy, {{ now()->translatedFormat('l d de F') }}.</p>
     </div>
@@ -63,7 +63,7 @@
                         <div class="py-3 flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <div class="bg-primary/10 text-primary font-bold px-3 py-1.5 rounded-lg text-sm">
-                                    {{ \Carbon\Carbon::parse($cita->hora_inicio)->format('h:i A') }}
+                                    {{ \Carbon\Carbon::parse($cita->fecha_hora)->format('h:i A') }}
                                 </div>
                                 <div>
                                     <p class="font-semibold text-base-content">{{ $cita->mascota->nombre ?? 'N/A' }}</p>

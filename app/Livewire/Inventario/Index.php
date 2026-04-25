@@ -11,13 +11,13 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Mary\Traits\Toast;
+use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
 #[Title('Catálogo e Inventario — VetNova')]
 class Index extends Component
 {
-    use WithPagination, Toast;
+    use WithPagination, AlertModal;
 
     // Filtros
     public string $search = '';
@@ -203,3 +203,5 @@ class Index extends Component
         ]);
     }
 }
+
+

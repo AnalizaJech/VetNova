@@ -14,13 +14,13 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Mary\Traits\Toast;
+use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
 #[Title('Caja y Facturación — VetNova')]
 class Index extends Component
 {
-    use Toast;
+    use AlertModal;
 
     // Carrito de compras
     public array $carrito = [];
@@ -186,7 +186,7 @@ class Index extends Component
         $this->total = round($total, 2);
     }
 
-    public function cobrar(): void
+    public function cobrar()
     {
         if (empty($this->carrito)) {
             $this->warning('El carrito está vacío.');
@@ -286,3 +286,5 @@ class Index extends Component
         return view('livewire.caja.index');
     }
 }
+
+

@@ -29,7 +29,7 @@ class Dashboard extends Component
             ->sum('total');
 
         $citasHoy = Cita::where('clinica_id', $clinica_id)
-            ->whereDate('fecha', $hoy)
+            ->whereDate('fecha_hora', $hoy)
             ->count();
 
         $nuevosPacientes = Mascota::where('clinica_id', $clinica_id)
@@ -46,9 +46,9 @@ class Dashboard extends Component
         // 2. Tablas Rápidas
         $proximasCitas = Cita::with(['mascota.cliente'])
             ->where('clinica_id', $clinica_id)
-            ->whereDate('fecha', $hoy)
+            ->whereDate('fecha_hora', $hoy)
             ->whereIn('estado', ['PENDIENTE', 'EN_PROGRESO'])
-            ->orderBy('hora_inicio', 'asc')
+            ->orderBy('fecha_hora', 'asc')
             ->take(5)
             ->get();
 
@@ -68,3 +68,5 @@ class Dashboard extends Component
         ]);
     }
 }
+
+
