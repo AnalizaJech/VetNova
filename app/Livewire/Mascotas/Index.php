@@ -209,12 +209,15 @@ class Index extends Component
         return Mascota::with('cliente')
             ->where('clinica_id', auth()->user()->clinica_id)
             ->when($this->search, function (Builder $query) {
-                $query->where('nombre', 'like', "%{$this->search}%")
-                      ->orWhereHas('cliente', function ($q) {
-                          $q->where('nombres', 'like', "%{$this->search}%")
-                            ->orWhere('apellidos', 'like', "%{$this->search}%")
-                            ->orWhere('numero_documento', 'like', "%{$this->search}%");
-                      });
+                // Envolver en where() para no romper el scope de clinica_id con orWhereHas
+                $query->where(function ($outer) {
+                    $outer->where('nombre', 'like', "%{$this->search}%")
+                          ->orWhereHas('cliente', function ($q) {
+                              $q->where('nombres', 'like', "%{$this->search}%")
+                                ->orWhere('apellidos', 'like', "%{$this->search}%")
+                                ->orWhere('numero_documento', 'like', "%{$this->search}%");
+                          });
+                });
             })
             ->orderBy('id', 'desc')
             ->paginate(10);

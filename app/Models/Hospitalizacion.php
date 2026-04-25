@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,13 +23,23 @@ class Hospitalizacion extends Model
         'motivo_ingreso',
         'fecha_ingreso',
         'fecha_alta',
-        'estado'
+        'estado',
     ];
 
-    protected $casts = [
-        'fecha_ingreso' => 'datetime',
-        'fecha_alta' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'fecha_ingreso' => 'datetime',
+            'fecha_alta' => 'datetime',
+        ];
+    }
+
+    // ── Relaciones ──
+
+    public function clinica(): BelongsTo
+    {
+        return $this->belongsTo(Clinica::class);
+    }
 
     public function mascota(): BelongsTo
     {
@@ -39,3 +51,4 @@ class Hospitalizacion extends Model
         return $this->hasMany(HospitalizacionNota::class)->orderBy('created_at', 'desc');
     }
 }
+

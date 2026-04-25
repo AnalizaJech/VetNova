@@ -56,7 +56,6 @@
                             <x-button label="Notas Clínicas" icon="o-document-text" wire:click="verNotas({{ $hosp->id }})" class="btn-sm btn-ghost text-info flex-1" />
                             
                             <x-button label="Dar de Alta" icon="o-check-circle" 
-                                wire:confirm="¿Estás seguro que deseas dar de alta al paciente {{ $hosp->mascota->nombre }}? Esto liberará su cama."
                                 wire:click="darDeAlta({{ $hosp->id }})" 
                                 class="btn-sm btn-success text-white" />
                         </div>
@@ -82,6 +81,7 @@
                 no-result-text="No se encontraron mascotas"
                 searchable
                 single
+                clearable
                 icon="o-magnifying-glass"
             />
 
@@ -130,6 +130,18 @@
                 <x-button label="Guardar Nota" type="submit" class="btn-info text-white" icon="o-pencil" spinner="guardarNota" />
             </x-slot:actions>
         </x-form>
+    </x-modal>
+
+    {{-- MODAL: Confirmación Premium de Alta --}}
+    <x-modal wire:model="modalAlta" title="Confirmar Alta Médica" separator class="backdrop-blur-sm">
+        <div class="py-4 text-base-content/80 text-lg">
+            <p>Estás a punto de dar de alta al paciente. Esto <strong>liberará su cama</strong> de inmediato.</p>
+            <p class="mt-2 text-error font-semibold">¿Deseas continuar con el alta?</p>
+        </div>
+        <x-slot:actions>
+            <x-button label="Cancelar" @click="$wire.modalAlta = false" class="btn-ghost" />
+            <x-button label="Sí, Dar de Alta" wire:click="confirmarAlta" class="btn-success text-white" icon="o-check" spinner="confirmarAlta" />
+        </x-slot:actions>
     </x-modal>
 
 </div>

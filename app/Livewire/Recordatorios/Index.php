@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Recordatorios;
 
 use App\Models\Cita;
-use App\Models\Vacuna;
+use App\Models\RegistroPreventivo;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -18,10 +18,13 @@ class Index extends Component
 {
     use AlertModal;
 
-    public function enviarWhatsApp(string $telefono, string $nombreCliente, string $tipo)
+    /**
+     * Simula envío de WhatsApp vía Twilio.
+     * En producción: inyectar TwilioClient y usar messages->create().
+     */
+    public function enviarWhatsApp(string $telefono, string $nombreCliente, string $tipo): void
     {
-        // En un entorno productivo, aquí se inyectaría el SDK de Twilio usando 
-        // las credenciales configuradas en el archivo .env (TWILIO_SID, TWILIO_TOKEN).
+        // TODO: Integrar SDK de Twilio real usando TWILIO_SID, TWILIO_TOKEN del .env
         // Ejemplo: TwilioClient->messages->create("whatsapp:$telefono", [...])
         
         // Simulamos un retraso de red
@@ -39,7 +42,7 @@ class Index extends Component
         $hoy = Carbon::today();
         $manana = Carbon::tomorrow();
 
-        // Buscar Citas (Hoy y Mañana)
+        // Buscar Citas pendientes/confirmadas de hoy y mañana
         $citas = Cita::with(['mascota.cliente'])
             ->where('clinica_id', $clinica_id)
             ->whereIn('estado', ['PENDIENTE', 'CONFIRMADA'])
@@ -47,11 +50,13 @@ class Index extends Component
             ->orderBy('fecha_hora', 'asc')
             ->get();
 
-        // Buscar Vacunas Próximas (Hoy y Mañana)
-        $vacunas = Vacuna::with(['mascota.cliente'])
+        // Buscar Vacunas/Desparasitaciones con próxima dosis hoy o mañana
+        // Modelo correcto: RegistroPreventivo — campo correcto: fecha_proxima
+        $vacunas = RegistroPreventivo::with(['mascota.cliente'])
             ->where('clinica_id', $clinica_id)
-            ->whereBetween('proxima_dosis', [$hoy, $manana->copy()->endOfDay()])
-            ->orderBy('proxima_dosis', 'asc')
+            ->whereNotNull('fecha_proxima')
+            ->whereBetween('fecha_proxima', [$hoy, $manana->copy()->endOfDay()])
+            ->orderBy('fecha_proxima', 'asc')
             ->get();
 
         return view('livewire.recordatorios.index', compact('citas', 'vacunas'));

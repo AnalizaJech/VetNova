@@ -45,9 +45,10 @@
             @endscope
 
             {{-- Acciones --}}
+            {{-- Acciones --}}
             @scope('actions', $historia)
                 <div class="flex items-center gap-1">
-                    <x-button icon="o-eye" link="#" class="btn-ghost btn-sm text-base-content" tooltip="Ver completo" />
+                    <x-button icon="o-eye" wire:click="verCompleto({{ $historia->id }})" class="btn-ghost btn-sm text-base-content" tooltip="Ver completo" />
                     <x-button icon="o-pencil" wire:click="edit({{ $historia->id }})" class="btn-ghost btn-sm text-info" tooltip="Editar" />
                 </div>
             @endscope
@@ -84,6 +85,7 @@
                             placeholder="Busca el nombre de la mascota..."
                             searchable
                             single
+                            clearable
                             icon="o-heart"
                         />
                         
@@ -125,5 +127,97 @@
             </x-slot:actions>
         </x-form>
 
+    </x-modal>
+
+    {{-- Modal Visor Completo --}}
+    <x-modal wire:model="modalVer" title="Expediente Clínico" subtitle="{{ $historiaSeleccionada?->fecha->format('d/m/Y h:i A') }}" separator class="backdrop-blur-sm" box-class="max-w-4xl">
+        @if($historiaSeleccionada)
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                {{-- Columna Info Paciente y Constantes --}}
+                <div class="col-span-1 space-y-4">
+                    {{-- Paciente --}}
+                    <div class="bg-base-200/50 p-4 rounded-xl border border-base-200">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="avatar placeholder">
+                                <div class="bg-primary/20 text-primary rounded-full w-12">
+                                    <x-icon name="o-heart" class="w-6 h-6" />
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg leading-none">{{ $historiaSeleccionada->mascota->nombre }}</h3>
+                                <p class="text-xs text-base-content/60">{{ $historiaSeleccionada->mascota->especie }} &bull; {{ $historiaSeleccionada->mascota->sexo === 'M' ? 'Macho' : 'Hembra' }}</p>
+                            </div>
+                        </div>
+                        <div class="text-xs mt-3 text-base-content/70">
+                            <strong>Propietario:</strong> {{ $historiaSeleccionada->mascota->cliente->nombre_completo ?? 'N/A' }}
+                        </div>
+                        <div class="text-xs mt-1 text-base-content/70">
+                            <strong>Veterinario:</strong> {{ $historiaSeleccionada->veterinario->name ?? 'N/A' }}
+                        </div>
+                    </div>
+
+                    {{-- Triage --}}
+                    <div class="bg-base-200/50 p-4 rounded-xl border border-base-200">
+                        <h4 class="font-bold text-sm mb-3 border-b border-base-300 pb-2">Constantes (Triage)</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-base-content/60"><x-icon name="o-scale" class="w-4 h-4 inline" /> Peso:</span>
+                                <span class="font-semibold">{{ $historiaSeleccionada->peso ? $historiaSeleccionada->peso . ' kg' : 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-base-content/60"><x-icon name="o-fire" class="w-4 h-4 inline" /> Temp:</span>
+                                <span class="font-semibold">{{ $historiaSeleccionada->temperatura ? $historiaSeleccionada->temperatura . ' °C' : 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-base-content/60"><x-icon name="o-heart" class="w-4 h-4 inline" /> Frec. Cardíaca:</span>
+                                <span class="font-semibold">{{ $historiaSeleccionada->frecuencia_cardiaca ? $historiaSeleccionada->frecuencia_cardiaca . ' lpm' : 'N/A' }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-base-content/60"><x-icon name="o-sparkles" class="w-4 h-4 inline" /> Frec. Resp:</span>
+                                <span class="font-semibold">{{ $historiaSeleccionada->frecuencia_respiratoria ? $historiaSeleccionada->frecuencia_respiratoria . ' rpm' : 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Columna Detalles Médicos --}}
+                <div class="col-span-1 md:col-span-2 space-y-4">
+                    
+                    <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm">
+                        <h4 class="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-1">Motivo de Consulta</h4>
+                        <p class="text-base font-semibold text-primary">{{ $historiaSeleccionada->motivo_consulta }}</p>
+                    </div>
+
+                    <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm">
+                        <h4 class="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-2">Anamnesis y Examen Físico</h4>
+                        <p class="text-sm whitespace-pre-wrap text-base-content/80">{{ $historiaSeleccionada->anamnesis ?: 'No se registraron detalles adicionales.' }}</p>
+                    </div>
+
+                    <div class="bg-base-100 p-4 rounded-xl border border-warning/30 shadow-sm">
+                        <h4 class="text-xs font-bold text-warning uppercase tracking-wider mb-2"><x-icon name="o-magnifying-glass" class="w-4 h-4 inline" /> Diagnóstico Presuntivo</h4>
+                        <p class="text-sm whitespace-pre-wrap font-medium">{{ $historiaSeleccionada->diagnostico_presuntivo ?: 'Sin diagnóstico registrado.' }}</p>
+                    </div>
+
+                    <div class="bg-base-100 p-4 rounded-xl border border-success/30 shadow-sm">
+                        <h4 class="text-xs font-bold text-success uppercase tracking-wider mb-2"><x-icon name="o-beaker" class="w-4 h-4 inline" /> Tratamiento e Indicaciones</h4>
+                        <p class="text-sm whitespace-pre-wrap">{{ $historiaSeleccionada->tratamiento_indicaciones ?: 'Sin indicaciones.' }}</p>
+                    </div>
+
+                    @if($historiaSeleccionada->proxima_cita_recomendada)
+                        <div class="bg-info/10 text-info p-3 rounded-xl border border-info/20 text-sm flex items-center gap-2">
+                            <x-icon name="o-calendar" class="w-5 h-5" />
+                            <strong>Próxima cita recomendada:</strong> {{ $historiaSeleccionada->proxima_cita_recomendada->format('d/m/Y') }}
+                        </div>
+                    @endif
+
+                </div>
+            </div>
+        @endif
+
+        <x-slot:actions>
+            <x-button label="Imprimir" icon="o-printer" class="btn-ghost" disabled />
+            <x-button label="Cerrar" @click="$wire.modalVer = false" class="btn-neutral" />
+        </x-slot:actions>
     </x-modal>
 </div>

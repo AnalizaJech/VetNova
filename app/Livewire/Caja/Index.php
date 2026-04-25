@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Caja;
 
 use App\Models\Cliente;
+use App\Models\KardexMovimiento;
 use App\Models\Producto;
 use App\Models\Venta;
 use App\Models\VentaDetalle;
@@ -235,9 +236,28 @@ class Index extends Component
                     'subtotal' => $item['subtotal'],
                 ]);
 
-                // Descontar stock
+                // Descontar stock con lock para evitar race conditions
                 if ($item['tipo'] === 'PRODUCTO') {
-                    Producto::where('id', $item['producto_id'])->decrement('stock_actual', $item['cantidad']);
+                    $producto = Producto::where('id', $item['producto_id'])->lockForUpdate()->first();
+                    
+                    if ($producto) {
+                        $stockAnterior = $producto->stock_actual;
+                        $producto->decrement('stock_actual', $item['cantidad']);
+                        
+                        // Registrar en Kardex
+                        KardexMovimiento::create([
+                            'clinica_id' => $nuevaVenta->clinica_id,
+                            'producto_id' => $producto->id,
+                            'usuario_id' => auth()->id(),
+                            'tipo' => 'SALIDA_VENTA',
+                            'cantidad' => -$item['cantidad'],
+                            'stock_anterior' => $stockAnterior,
+                            'stock_posterior' => $stockAnterior - $item['cantidad'],
+                            'referencia_tipo' => 'venta',
+                            'referencia_id' => $nuevaVenta->id,
+                            'notas' => 'Venta en caja'
+                        ]);
+                    }
                 }
             }
             

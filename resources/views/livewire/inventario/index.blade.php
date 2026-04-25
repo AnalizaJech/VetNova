@@ -77,10 +77,13 @@
             {{-- Acciones --}}
             @scope('actions', $item)
                 <div class="flex items-center gap-1">
-                    <x-button icon="o-pencil" wire:click="edit({{ $item->id }})" class="btn-ghost btn-sm text-info" tooltip="Editar" />
+                    @if($item->tipo === 'PRODUCTO')
+                        <x-button icon="o-clipboard-document-list" wire:click="verKardex({{ $item->id }})" class="btn-ghost btn-sm text-primary" tooltip="Ver Kardex" spinner />
+                    @endif
+                    <x-button icon="o-pencil" wire:click="edit({{ $item->id }})" class="btn-ghost btn-sm text-info" tooltip="Editar" spinner />
                     <x-button icon="o-trash" class="btn-ghost btn-sm text-error" tooltip="Eliminar"
                         wire:confirm="¿Seguro que deseas eliminar {{ $item->nombre }}?"
-                        wire:click="delete({{ $item->id }})" />
+                        wire:click="delete({{ $item->id }})" spinner />
                 </div>
             @endscope
         </x-table>
@@ -100,19 +103,22 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <x-select label="Tipo de Item" wire:model.live="tipo" :options="$tipos" required />
-                <x-input label="Categoría" wire:model="categoria" placeholder="Ej. Medicamentos, Baño..." list="categorias-list" />
-                {{-- Sugerencias nativas HTML para categoría --}}
-                <datalist id="categorias-list">
-                    <option value="Medicamento">
-                    <option value="Accesorio">
-                    <option value="Alimento">
-                    <option value="Consulta">
-                    <option value="Grooming">
-                    <option value="Laboratorio">
-                </datalist>
+                
+                @php
+                $categorias_fijas = [
+                    ['id' => 'Medicamento', 'name' => 'Medicamento'],
+                    ['id' => 'Accesorio', 'name' => 'Accesorio'],
+                    ['id' => 'Alimento', 'name' => 'Alimento'],
+                    ['id' => 'Consulta', 'name' => 'Consulta'],
+                    ['id' => 'Grooming', 'name' => 'Grooming'],
+                    ['id' => 'Laboratorio', 'name' => 'Laboratorio'],
+                    ['id' => 'Otro', 'name' => 'Otro'],
+                ];
+                @endphp
+                <x-select label="Categoría" wire:model="categoria" :options="$categorias_fijas" required />
             </div>
 
-            <x-input label="Nombre / Descripción" wire:model="nombre" required placeholder="Ej. Vacuna Quíntuple Zoetis" class="mb-4" />
+            <x-input label="Nombre / Descripción" wire:model="nombre" required placeholder="Ej. Vacuna Quíntuple Zoetis" autocomplete="off" class="mb-4" />
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <x-input label="Precio de Venta (S/)" wire:model="precio_venta" type="number" step="0.01" required icon="o-currency-dollar" class="font-bold text-success" />
@@ -143,5 +149,58 @@
             </x-slot:actions>
         </x-form>
 
+    </x-modal>
+
+    {{-- ═══════════ MODAL KARDEX ═══════════ --}}
+    <x-modal wire:model="modalKardex" title="Kardex de Movimientos" subtitle="{{ $kardexProducto?->nombre }}" separator box-class="max-w-4xl" class="backdrop-blur-sm">
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <x-stat title="Stock Actual" value="{{ $kardexProducto?->stock_actual }}" icon="o-cube" />
+            <x-stat title="Costo" value="S/ {{ number_format((float) $kardexProducto?->costo_compra, 2) }}" icon="o-banknotes" />
+            <x-stat title="Precio Venta" value="S/ {{ number_format((float) $kardexProducto?->precio_venta, 2) }}" icon="o-currency-dollar" class="text-success" />
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Usuario</th>
+                        <th>Cant.</th>
+                        <th>Stock Resultante</th>
+                        <th>Ref.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($this->kardex as $mov)
+                        <tr>
+                            <td class="whitespace-nowrap">{{ $mov->created_at->format('d/m/Y H:i') }}</td>
+                            <td>
+                                <x-badge value="{{ $mov->tipo_badge['label'] }}" class="{{ $mov->tipo_badge['class'] }} badge-sm" />
+                            </td>
+                            <td>{{ $mov->usuario->name ?? 'Sistema' }}</td>
+                            <td class="font-bold {{ $mov->cantidad > 0 ? 'text-success' : 'text-error' }}">
+                                {{ $mov->cantidad > 0 ? '+' : '' }}{{ $mov->cantidad }}
+                            </td>
+                            <td class="font-mono">{{ $mov->stock_posterior }}</td>
+                            <td class="text-xs text-base-content/60 max-w-[150px] truncate" title="{{ $mov->notas }}">
+                                {{ $mov->notas ?? '-' }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-6 text-base-content/50">
+                                No hay movimientos registrados para este producto.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <x-slot:actions>
+            <x-button label="Cerrar" @click="$wire.modalKardex = false" class="btn-ghost" />
+        </x-slot:actions>
     </x-modal>
 </div>

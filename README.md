@@ -55,14 +55,19 @@ NUBEFACT_TOKEN="tu_token_nubefact_aqui"
 
 ## Base de Datos
 
-Asegúrate de crear la base de datos `vetnova` vacía en MySQL. Luego, ejecuta las migraciones y seeders. El seeder preparará el entorno inicial poblando los ubigeos del Perú, creando roles base y generando la primera clínica.
+El sistema utiliza exclusivamente MySQL/MariaDB. En la carpeta `/database` se encuentra el archivo `database.sql` que contiene la estructura final del esquema de la base de datos (con Kardex, Prescripciones y tablas de seguridad). 
+
+> **Nota:** Debido a que VetNova utiliza vistas y triggers complejos en versiones futuras, la regla de oro para desplegar en un entorno nuevo es importar directamente el SQL proporcionado o ejecutar las migraciones frescas.
 
 ```bash
-php artisan migrate --seed
+# Opción 1: Migrar y sembrar datos base (Recomendado)
+php artisan migrate:fresh --seed
 ```
 
+*(Si necesitas exportar la estructura manualmente, usa: `mysqldump -u root vetnova > database/database.sql` en la terminal de tu servidor de BD).*
+
 ### Usuarios de Prueba
-Tras la migración, usa estas credenciales para entrar al sistema:
+Tras la migración, usa estas credenciales para entrar al sistema como `super_admin`:
 - **Correo:** `admin@vetnova.pe`
 - **Contraseña:** `password`
 
@@ -87,19 +92,22 @@ El sistema estará disponible en `http://localhost:8000`.
 
 ## Decisiones Técnicas Destacadas
 - **SPA Liviana:** Se eligió el ecosistema de **Livewire + Mary UI** sobre Next.js/React para eliminar la sobrecarga de mantener dos repositorios separados. Se alcanza una UX premium asíncrona pero manejada directamente con la potencia de PHP.
-- **Buscadores Asíncronos:** Módulos críticos como la *Caja (POS)* y *Citas* utilizan `x-choices` asíncronos. En vez de enviar listas enteras al cliente (lo cual colapsaría el navegador si la veterinaria tiene 10,000 productos), la base de datos hace las búsquedas en tiempo real.
-- **Tickets Térmicos vía Web:** Se optó por usar `@media print` directo desde Blade en vez de librerías pesadas como DOMPDF, esto permite invocar a `window.print()` nativamente y adaptar tickets instantáneos perfectos para tiqueteras de 80mm.
-- **Facturación Inteligente:** Se diseñó el inventario incluyendo un flag `afecto_igv` a nivel de producto. De este modo, la Caja sabe exactamente qué cálculos tributarios enviar a Nubefact sin forzar a los administradores a conocer tecnicismos contables en su trabajo diario.
+- **Buscadores Asíncronos:** Módulos críticos como la *Caja (POS)* y *Citas* utilizan `x-choices` asíncronos para evitar colapsos de memoria.
+- **Tickets Térmicos vía Web:** Se optó por usar `@media print` directo desde Blade en vez de librerías pesadas como DOMPDF, esto permite invocar a `window.print()` nativamente y adaptar tickets instantáneos para tiqueteras de 80mm.
+- **Seguridad Multi-Tenant Estricta:** Las rutas, scopes de Livewire y validaciones `OrFail` siempre incluyen `where('clinica_id', ...)` acoplado a middleware de permisos Spatie Role/Permission.
+- **Control de Concurrencia:** La lógica de caja implementa bloqueos de base de datos pesimistas (`lockForUpdate`) para evitar ventas de stock negativo bajo alta concurrencia.
 
 ## 🏥 Módulos Principales
-1. **Punto de Venta (Caja) y Facturación Inteligente**: Integración con Nubefact, cálculo de IGV, control de caja y visor de historial de facturación con reimpresión de tickets térmicos.
-2. **Historias Clínicas y Triaje**: Registro detallado por consulta, subida de archivos (Radiografías) y emisión de recetas en PDF.
-3. **Control de Vacunas**: Calendario de vacunación y control de dosis.
-4. **Inventario Híbrido**: Control dual de "Productos" (con descuento de stock en caja) y "Servicios" (Consultas, Baños).
-5. **Hospitalización (Internamiento)**: Panel de control visual de camas, bitácora de evolución médica (notas cronológicas) y altas médicas.
-6. **Centro de Recordatorios**: Panel automatizado para gestionar las citas y vacunas pendientes del día y enviar notificaciones vía WhatsApp/SMS integrables con Twilio.
-7. **Reportes y Analíticas**: Dashboard gerencial con Chart.js para medir ingresos, estado de atenciones y top de ventas en tiempo real.
+1. **Punto de Venta (Caja) y Facturación Inteligente**: Integración con Nubefact, cálculo de IGV, control de caja y emisión.
+2. **Historias Clínicas, Triaje y Prescripciones**: Flujo médico completo. Las prescripciones se entrelazan con el inventario para facilitar el despacho en caja.
+3. **Control de Vacunas**: Calendario de registro preventivo (vacunas, antipulgas).
+4. **Inventario Híbrido y Kardex Inmutable**: Control dual de "Productos" y "Servicios". Cada compra, venta o ajuste manual se audita automáticamente en un *Kardex inmutable* de control logístico.
+5. **Hospitalización (Internamiento)**: Panel de control visual de camas, bitácora de evolución médica (notas) y sistema de altas.
+6. **Centro de Recordatorios**: Panel automatizado para gestionar las citas y vacunas pendientes del día (preparado para integración Twilio WhatsApp).
+7. **Panel de Configuración y Seguridad**: CRUD de usuarios internos con asignación de roles jerárquicos (Spatie) y administración general de la clínica/sucursales.
+8. **Reportes y Analíticas**: Dashboard gerencial con Chart.js para medir KPIs en tiempo real.
 
 ## 🚀 Futuras Mejoras 
 - Portal de auto-servicio para que los clientes vean las recetas de sus mascotas.
 - Integración contable para multi-cajas simultáneas.
+- Implementación total del flujo E2E Testing (Pest + Playwright).

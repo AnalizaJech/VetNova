@@ -58,4 +58,9 @@ class Producto extends Model
     {
         return $this->belongsTo(Clinica::class);
     }
+
+    public function movimientosKardex(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(KardexMovimiento::class);
+    }
 }

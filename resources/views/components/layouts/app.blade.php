@@ -51,40 +51,64 @@
             {{-- Menú de navegación --}}
             <x-menu activate-by-route class="mt-2">
 
-                {{-- Dashboard --}}
+                {{-- Dashboard: visible para todos --}}
                 <x-menu-item title="Dashboard" icon="o-home" link="{{ route('dashboard') }}" />
 
                 {{-- Agenda --}}
-                <x-menu-item title="Citas" icon="o-calendar" link="{{ route('citas') }}" badge="Nuevo" badge-classes="badge-primary badge-sm" />
+                @can('citas.ver')
+                    <x-menu-item title="Citas" icon="o-calendar" link="{{ route('citas') }}" badge="Nuevo" badge-classes="badge-primary badge-sm" />
+                @endcan
 
                 <x-menu-separator />
 
                 {{-- Sección Clínica --}}
                 <x-menu-sub title="Clínica" icon="o-building-office">
-                    <x-menu-item title="Clientes" icon="o-users" link="{{ route('clientes') }}" />
-                    <x-menu-item title="Mascotas" icon="o-heart" link="{{ route('mascotas') }}" />
-                    <x-menu-item title="Historia Clínica" icon="o-clipboard-document-list" link="{{ route('historias') }}" />
-                    <x-menu-item title="Vacunas" icon="o-shield-check" link="{{ route('vacunas') }}" />
+                    @can('clientes.ver')
+                        <x-menu-item title="Clientes" icon="o-users" link="{{ route('clientes') }}" />
+                    @endcan
+                    @can('mascotas.ver')
+                        <x-menu-item title="Mascotas" icon="o-heart" link="{{ route('mascotas') }}" />
+                    @endcan
+                    @can('historias.ver')
+                        <x-menu-item title="Historia Clínica" icon="o-clipboard-document-list" link="{{ route('historias') }}" />
+                    @endcan
+                    @can('vacunas.ver')
+                        <x-menu-item title="Vacunas" icon="o-shield-check" link="{{ route('vacunas') }}" />
+                    @endcan
                 </x-menu-sub>
 
                 {{-- Sección Operaciones --}}
                 <x-menu-sub title="Operaciones" icon="o-cog-6-tooth">
-                    <x-menu-item title="Inventario" icon="o-cube" link="{{ route('inventario') }}" />
-                    <x-menu-item title="Punto de Venta" icon="o-banknotes" link="{{ route('caja') }}" badge="POS" badge-classes="badge-success badge-sm" />
-                    <x-menu-item title="Facturación" icon="o-document-text" link="{{ route('facturacion') }}" />
-                    <x-menu-item title="Hospitalización" icon="o-building-office-2" link="{{ route('hospitalizacion') }}" />
+                    @can('inventario.ver')
+                        <x-menu-item title="Inventario" icon="o-cube" link="{{ route('inventario') }}" />
+                    @endcan
+                    @can('caja.ver')
+                        <x-menu-item title="Punto de Venta" icon="o-banknotes" link="{{ route('caja') }}" badge="POS" badge-classes="badge-success badge-sm" />
+                    @endcan
+                    @can('facturacion.ver')
+                        <x-menu-item title="Facturación" icon="o-document-text" link="{{ route('facturacion') }}" />
+                    @endcan
+                    @can('hospitalizacion.ver')
+                        <x-menu-item title="Hospitalización" icon="o-building-office-2" link="{{ route('hospitalizacion') }}" />
+                    @endcan
                 </x-menu-sub>
 
                 <x-menu-separator />
 
                 {{-- Notificaciones y reportes --}}
-                <x-menu-item title="Recordatorios" icon="o-bell" link="{{ route('recordatorios') }}" />
-                <x-menu-item title="Reportes" icon="o-chart-bar" link="{{ route('reportes') }}" />
+                @can('recordatorios.ver')
+                    <x-menu-item title="Recordatorios" icon="o-bell" link="{{ route('recordatorios') }}" />
+                @endcan
+                @can('reportes.ver')
+                    <x-menu-item title="Reportes" icon="o-chart-bar" link="{{ route('reportes') }}" />
+                @endcan
 
                 @can('configuracion.ver')
                     <x-menu-separator />
-                    <x-menu-item title="Configuración" icon="o-cog-8-tooth" link="/configuracion" />
-                    <x-menu-item title="Usuarios" icon="o-user-group" link="/usuarios" />
+                    <x-menu-item title="Configuración" icon="o-cog-8-tooth" link="{{ route('configuracion') }}" />
+                @endcan
+                @can('usuarios.ver')
+                    <x-menu-item title="Usuarios" icon="o-user-group" link="{{ route('usuarios') }}" />
                 @endcan
             </x-menu>
 

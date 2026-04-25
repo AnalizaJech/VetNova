@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Inventario;
 
+use App\Models\KardexMovimiento;
 use App\Models\Producto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -24,9 +25,11 @@ class Index extends Component
     public string $filtroTipo = '';
     public bool $filtroStockBajo = false;
 
-    // Modal
+    // Modales
     public bool $modalModal = false;
     public bool $isEditing = false;
+    public bool $modalKardex = false;
+    public ?Producto $kardexProducto = null;
 
     // Formulario
     public ?int $producto_id = null;
@@ -131,12 +134,54 @@ class Index extends Component
             'notas' => $this->notas,
         ];
 
+        // Lógica para Kardex
+        $diferencia_stock = 0;
+        $stock_anterior = 0;
+        $tipo_movimiento = null;
+
         if ($this->isEditing && $this->producto_id) {
-            Producto::where('clinica_id', $clinica_id)->findOrFail($this->producto_id)->update($data);
+            $producto = Producto::where('clinica_id', $clinica_id)->findOrFail($this->producto_id);
+            
+            if ($this->tipo === 'PRODUCTO') {
+                $stock_anterior = $producto->stock_actual;
+                $diferencia_stock = $this->stock_actual - $stock_anterior;
+                
+                if ($diferencia_stock > 0) {
+                    $tipo_movimiento = 'ENTRADA_AJUSTE';
+                } elseif ($diferencia_stock < 0) {
+                    $tipo_movimiento = 'SALIDA_AJUSTE';
+                }
+            }
+
+            $producto->update($data);
+            $producto_id_final = $producto->id;
+            
             $this->success('Item actualizado correctamente.');
         } else {
-            Producto::create($data);
+            $producto = Producto::create($data);
+            $producto_id_final = $producto->id;
+            
+            if ($this->tipo === 'PRODUCTO' && $this->stock_actual > 0) {
+                $diferencia_stock = $this->stock_actual;
+                $stock_anterior = 0;
+                $tipo_movimiento = 'ENTRADA_COMPRA'; // Inventario inicial
+            }
+            
             $this->success('Item agregado al catálogo.');
+        }
+
+        // Registrar en el Kardex si hubo un cambio de stock
+        if ($diferencia_stock !== 0 && $tipo_movimiento) {
+            KardexMovimiento::create([
+                'clinica_id' => $clinica_id,
+                'producto_id' => $producto_id_final,
+                'usuario_id' => auth()->id(),
+                'tipo' => $tipo_movimiento,
+                'cantidad' => $diferencia_stock,
+                'stock_anterior' => $stock_anterior,
+                'stock_posterior' => $stock_anterior + $diferencia_stock,
+                'notas' => $this->isEditing ? 'Ajuste manual de stock' : 'Inventario inicial',
+            ]);
         }
 
         $this->modalModal = false;
@@ -148,6 +193,15 @@ class Index extends Component
         $producto = Producto::where('clinica_id', auth()->user()->clinica_id)->findOrFail($id);
         $producto->delete();
         $this->warning('Eliminado del catálogo.');
+    }
+
+    public function verKardex(int $id): void
+    {
+        $this->kardexProducto = Producto::where('clinica_id', auth()->user()->clinica_id)
+            ->where('tipo', 'PRODUCTO')
+            ->findOrFail($id);
+            
+        $this->modalKardex = true;
     }
 
     private function resetForm(): void
@@ -193,6 +247,16 @@ class Index extends Component
             })
             ->orderBy('nombre', 'asc')
             ->paginate(15);
+    }
+
+    public function getKardexProperty()
+    {
+        if (!$this->kardexProducto) return collect();
+
+        return KardexMovimiento::with('usuario')
+            ->where('producto_id', $this->kardexProducto->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function render()

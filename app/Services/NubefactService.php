@@ -47,21 +47,22 @@ class NubefactService
         $items = [];
         
         foreach ($venta->detalles as $detalle) {
-            $es_gravado = $detalle->afecto_igv;
-            
-            // SUNAT exige separar Valor Unitario (sin IGV) del Precio Unitario (con IGV)
-            if ($es_gravado) {
-                $valor_unitario = $detalle->precio_unitario / 1.18;
-                $igv_item = $detalle->precio_unitario - $valor_unitario;
+            $precio_unitario = (float) $detalle->precio_unitario;
+            $cantidad = (float) $detalle->cantidad;
+            $subtotal_item = (float) $detalle->subtotal;
+
+            if ($detalle->afecto_igv) {
+                $valor_unitario = $precio_unitario / 1.18;
+                $igv_item = $precio_unitario - $valor_unitario;
                 
-                $total_gravada += ($valor_unitario * $detalle->cantidad);
-                $total_igv += ($igv_item * $detalle->cantidad);
+                $total_gravada += ($valor_unitario * $cantidad);
+                $total_igv += ($igv_item * $cantidad);
                 $tipo_igv = 1; // 1 = Gravado - Operación Onerosa
             } else {
-                $valor_unitario = $detalle->precio_unitario;
+                $valor_unitario = $precio_unitario;
                 $igv_item = 0;
                 
-                $total_exonerada += ($valor_unitario * $detalle->cantidad);
+                $total_exonerada += ($valor_unitario * $cantidad);
                 $tipo_igv = 8; // 8 = Exonerado - Operación Onerosa
             }
 
@@ -69,14 +70,14 @@ class NubefactService
                 "unidad_de_medida" => "NIU", // Bien o Servicio genérico
                 "codigo"           => "P" . str_pad((string)$detalle->producto_id, 4, '0', STR_PAD_LEFT),
                 "descripcion"      => $detalle->descripcion,
-                "cantidad"         => $detalle->cantidad,
+                "cantidad"         => $cantidad,
                 "valor_unitario"   => round($valor_unitario, 2),
-                "precio_unitario"  => round($detalle->precio_unitario, 2),
+                "precio_unitario"  => round($precio_unitario, 2),
                 "descuento"        => "",
-                "subtotal"         => round($valor_unitario * $detalle->cantidad, 2),
+                "subtotal"         => round($valor_unitario * $cantidad, 2),
                 "tipo_de_igv"      => $tipo_igv,
-                "igv"              => round($igv_item * $detalle->cantidad, 2),
-                "total"            => round($detalle->subtotal, 2),
+                "igv"              => round($igv_item * $cantidad, 2),
+                "total"            => round($subtotal_item, 2),
                 "anticipo_regularizacion" => "false"
             ];
         }
@@ -90,7 +91,7 @@ class NubefactService
         if ($venta->cliente) {
             $cliente_tipo_doc = $venta->cliente->tipo_documento === 'RUC' ? "6" : "1";
             $cliente_numero = $venta->cliente->numero_documento ?? "00000000";
-            $cliente_nombre = $venta->cliente->nombres . ' ' . $venta->cliente->apellidos;
+            $cliente_nombre = trim($venta->cliente->nombres . ' ' . ($venta->cliente->apellidos ?? ''));
         } elseif ($venta->tipo_comprobante === 'FACTURA') {
             return ['exito' => false, 'error' => 'Una FACTURA exige tener un cliente con RUC.'];
         }
@@ -110,15 +111,15 @@ class NubefactService
             "cliente_tipo_de_documento" => $cliente_tipo_doc,
             "cliente_numero_de_documento" => $cliente_numero,
             "cliente_denominacion" => $cliente_nombre,
-            "cliente_direccion" => $venta->cliente->direccion ?? "LIMA",
-            "cliente_email" => $venta->cliente->email ?? "",
+            "cliente_direccion" => $venta->cliente?->direccion ?? "LIMA",
+            "cliente_email" => $venta->cliente?->email ?? "",
             "fecha_de_emision" => $venta->created_at->format('d-m-Y'),
             "moneda" => "1", // 1 = Soles
             "porcentaje_de_igv" => "18.00",
             "total_gravada" => round($total_gravada, 2) > 0 ? round($total_gravada, 2) : "",
             "total_exonerada" => round($total_exonerada, 2) > 0 ? round($total_exonerada, 2) : "",
             "total_igv" => round($total_igv, 2),
-            "total" => round($venta->total, 2),
+            "total" => round((float) $venta->total, 2),
             "detraccion" => "false",
             "enviar_automaticamente_a_la_sunat" => "true",
             "enviar_automaticamente_al_cliente" => "false",

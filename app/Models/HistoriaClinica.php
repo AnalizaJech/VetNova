@@ -63,4 +63,9 @@ class HistoriaClinica extends Model
     {
         return $this->belongsTo(Cita::class);
     }
+
+    public function prescripciones(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Prescripcion::class, 'historia_clinica_id');
+    }
 }

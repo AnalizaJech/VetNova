@@ -54,7 +54,7 @@
 
             @if($proximasCitas->isEmpty())
                 <div class="text-center py-6 text-base-content/40">
-                    <x-icon name="o-cup" class="w-10 h-10 mx-auto mb-2 opacity-50" />
+                    <x-icon name="o-face-smile" class="w-10 h-10 mx-auto mb-2 opacity-50" />
                     <p>No tienes citas pendientes para el resto del día.</p>
                 </div>
             @else

@@ -23,9 +23,14 @@ class Index extends Component
     use WithPagination, AlertModal;
 
     // Búsqueda
+    #[\Livewire\Attributes\Url]
     public string $search = '';
 
-    // Modal
+    // Modal Visor Completo
+    public bool $modalVer = false;
+    public ?HistoriaClinica $historiaSeleccionada = null;
+
+    // Modal Formulario
     public bool $modalModal = false;
     public bool $isEditing = false;
 
@@ -56,6 +61,12 @@ class Index extends Component
     public function updatedSearch(): void
     {
         $this->resetPage();
+    }
+
+    public function verCompleto(int $id): void
+    {
+        $this->historiaSeleccionada = HistoriaClinica::with(['mascota.cliente', 'veterinario'])->findOrFail($id);
+        $this->modalVer = true;
     }
 
     /**
@@ -219,13 +230,16 @@ class Index extends Component
         return HistoriaClinica::with(['mascota.cliente', 'veterinario'])
             ->where('clinica_id', auth()->user()->clinica_id)
             ->when($this->search, function (Builder $query) {
-                $query->whereHas('mascota', function ($q) {
-                    $q->where('nombre', 'like', "%{$this->search}%")
-                      ->orWhereHas('cliente', function ($q2) {
-                          $q2->where('nombres', 'like', "%{$this->search}%")
-                             ->orWhere('apellidos', 'like', "%{$this->search}%");
-                      });
-                })->orWhere('motivo_consulta', 'like', "%{$this->search}%");
+                // Envolver en where() para proteger el scope de clinica_id
+                $query->where(function ($outer) {
+                    $outer->whereHas('mascota', function ($q) {
+                        $q->where('nombre', 'like', "%{$this->search}%")
+                          ->orWhereHas('cliente', function ($q2) {
+                              $q2->where('nombres', 'like', "%{$this->search}%")
+                                 ->orWhere('apellidos', 'like', "%{$this->search}%");
+                          });
+                    })->orWhere('motivo_consulta', 'like', "%{$this->search}%");
+                });
             })
             ->orderBy('fecha', 'desc')
             ->paginate(15);

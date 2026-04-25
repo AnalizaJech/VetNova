@@ -28,6 +28,10 @@ class Cliente extends Model
         'notas',
     ];
 
+    protected $appends = [
+        'nombre_completo',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -58,5 +62,10 @@ class Cliente extends Model
     public function distrito(): BelongsTo
     {
         return $this->belongsTo(UbigeoDistrito::class, 'distrito_id');
+    }
+
+    public function mascotas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Mascota::class);
     }
 }

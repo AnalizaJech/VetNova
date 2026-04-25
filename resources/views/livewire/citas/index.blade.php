@@ -124,6 +124,7 @@
                 placeholder="Busca por nombre o documento..."
                 searchable
                 single
+                clearable
                 icon="o-user"
             />
 
@@ -136,6 +137,7 @@
                 option-value="id"
                 placeholder="Seleccione la mascota"
                 single
+                clearable
                 icon="o-heart"
                 :disabled="empty($mascotasSelect)"
             />
@@ -160,6 +162,7 @@
                     option-value="id"
                     placeholder="Opcional"
                     single
+                    clearable
                 />
             </div>
 

@@ -252,12 +252,15 @@ class Index extends Component
                 $query->where('estado', $this->filtroEstado);
             })
             ->when($this->search, function (Builder $query) {
-                $query->whereHas('cliente', function ($q) {
-                    $q->where('nombres', 'like', "%{$this->search}%")
-                      ->orWhere('apellidos', 'like', "%{$this->search}%");
-                })->orWhereHas('mascota', function ($q) {
-                    $q->where('nombre', 'like', "%{$this->search}%");
-                })->orWhere('motivo', 'like', "%{$this->search}%");
+                // Envolver en where() para proteger el scope de clinica_id
+                $query->where(function ($outer) {
+                    $outer->whereHas('cliente', function ($q) {
+                        $q->where('nombres', 'like', "%{$this->search}%")
+                          ->orWhere('apellidos', 'like', "%{$this->search}%");
+                    })->orWhereHas('mascota', function ($q) {
+                        $q->where('nombre', 'like', "%{$this->search}%");
+                    })->orWhere('motivo', 'like', "%{$this->search}%");
+                });
             })
             ->orderBy('fecha_hora', 'asc')
             ->paginate(15);

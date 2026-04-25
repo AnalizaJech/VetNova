@@ -1,0 +1,14 @@
+-- --------------------------------------------------------
+-- VETNOVA - SISTEMA DE GESTIÓN VETERINARIA
+-- Exportación de estructura y datos semilla
+-- 
+-- IMPORTANTE: mysqldump no está configurado en las variables de entorno 
+-- de este sistema Windows (XAMPP). Para exportar la estructura real, 
+-- ejecuta el siguiente comando en la "Shell" del panel de control de XAMPP:
+--
+-- mysqldump -u root vetnova > C:\Users\JORGE\Desktop\VetNova\database\database.sql
+-- --------------------------------------------------------
+
+-- Este archivo debe contener el volcado final de la base de datos 
+-- con las tablas y relaciones generadas por:
+-- php artisan migrate:fresh --seed

@@ -86,7 +86,7 @@
             {{-- Acciones --}}
             @scope('actions', $mascota)
                 <div class="flex items-center gap-1">
-                    <x-button icon="o-clipboard-document-list" link="#" class="btn-ghost btn-sm text-primary" tooltip="Historia Clínica" />
+                    <x-button icon="o-clipboard-document-list" link="{{ route('historias', ['search' => $mascota->nombre]) }}" wire:navigate class="btn-ghost btn-sm text-primary" tooltip="Historia Clínica" />
                     <x-button icon="o-pencil" wire:click="edit({{ $mascota->id }})" class="btn-ghost btn-sm text-info" tooltip="Editar" />
                     <x-button icon="o-trash" class="btn-ghost btn-sm text-error" tooltip="Eliminar"
                         wire:confirm="¿Estás seguro de eliminar a {{ $mascota->nombre }}?"

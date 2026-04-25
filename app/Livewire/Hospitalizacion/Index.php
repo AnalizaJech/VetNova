@@ -35,6 +35,10 @@ class Index extends Component
     public ?Hospitalizacion $hospActual = null;
     public string $nuevaNota = '';
 
+    // Confirmación Alta
+    public bool $modalAlta = false;
+    public ?int $hospAltaId = null;
+
     public function buscarMascotas(string $value = '')
     {
         $this->mascotasSearch = Mascota::query()
@@ -103,9 +107,18 @@ class Index extends Component
         $this->success('Evolución clínica agregada.');
     }
 
-    public function darDeAlta(int $id)
+    public function darDeAlta(int $id): void
     {
-        $hosp = Hospitalizacion::findOrFail($id);
+        $this->hospAltaId = $id;
+        $this->modalAlta = true;
+    }
+
+    public function confirmarAlta(): void
+    {
+        if (!$this->hospAltaId) return;
+
+        // Scope de clinica para proteger multi-tenant
+        $hosp = Hospitalizacion::where('clinica_id', auth()->user()->clinica_id)->findOrFail($this->hospAltaId);
         
         $hosp->update([
             'estado' => 'DE_ALTA',
@@ -113,6 +126,8 @@ class Index extends Component
             'jaula' => null // Libera la jaula para otro paciente
         ]);
 
+        $this->modalAlta = false;
+        $this->hospAltaId = null;
         $this->success('Paciente dado de alta correctamente.', '¡Alta Exitosa!');
     }
 

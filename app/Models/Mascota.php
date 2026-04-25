@@ -74,4 +74,24 @@ class Mascota extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    public function historias(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(HistoriaClinica::class);
+    }
+
+    public function citas(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Cita::class);
+    }
+
+    public function registrosPreventivos(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(RegistroPreventivo::class);
+    }
+
+    public function hospitalizaciones(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Hospitalizacion::class);
+    }
 }

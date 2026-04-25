@@ -19,12 +19,13 @@
                     no-result-text="Producto no encontrado o sin stock."
                     searchable
                     single
+                    clearable
                     icon="o-magnifying-glass"
                     class="text-lg"
                 >
                     {{-- Plantilla personalizada para el dropdown de productos --}}
                     @scope('item', $producto)
-                        <x-list-item :item="$producto" sub-value="categoria">
+                        <x-list-item :item="$producto" value="nombre" sub-value="categoria">
                             <x-slot:actions>
                                 <span class="font-bold text-success">S/ {{ $producto->precio_venta }}</span>
                                 @if($producto->tipo === 'PRODUCTO')
@@ -98,6 +99,7 @@
                     option-value="id"
                     placeholder="Público General"
                     searchable
+                    clearable
                     single
                     icon="o-user"
                 />
@@ -132,14 +134,21 @@
                     </div>
                 </div>
 
-                <x-button 
-                    label="Procesar y Cobrar" 
-                    icon="o-check-circle" 
-                    wire:click="cobrar" 
-                    spinner="cobrar" 
-                    class="btn-primary w-full shadow-lg" 
-                    @if(empty($carrito)) disabled @endif 
-                />
+                @if(empty($carrito))
+                    <x-button 
+                        label="Agregue productos para cobrar" 
+                        icon="o-shopping-cart" 
+                        class="btn-primary w-full shadow-lg btn-disabled opacity-50" 
+                    />
+                @else
+                    <x-button 
+                        label="Procesar y Cobrar" 
+                        icon="o-check-circle" 
+                        wire:click="cobrar" 
+                        spinner="cobrar" 
+                        class="btn-primary w-full shadow-lg" 
+                    />
+                @endif
             </div>
 
         </div>
