@@ -3,9 +3,6 @@
 # Coloca este archivo en la RAÍZ de tu proyecto Laravel
 # ============================================================
 
-[build]
-builder = "NIXPACKS"
-
 [deploy]
 healthcheckPath = "/login"
 healthcheckTimeout = 60
