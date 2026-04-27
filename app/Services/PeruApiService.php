@@ -44,11 +44,6 @@ final class PeruApiService
         );
     }
 
-    /**
-     * Consultar datos de una empresa por RUC.
-     * Cache: 24 horas (datos pueden cambiar: dirección, estado, etc).
-     * Valida el dígito verificador localmente ANTES de llamar a la API.
-     */
     public function consultarRuc(string $ruc): ?array
     {
         // Validación local: RUC debe ser 11 dígitos
@@ -70,7 +65,6 @@ final class PeruApiService
 
     /**
      * Obtener tipo de cambio del día (compra/venta USD).
-     * Cache: 12 horas.
      */
     public function tipoCambio(): ?array
     {
@@ -82,8 +76,7 @@ final class PeruApiService
     }
 
     /**
-     * Realiza la petición HTTP a PeruAPI.
-     * Timeout: 8 segundos. Reintentos: 3 con backoff exponencial.
+     * Realiza la petición HTTP a PeruAPI usando REST.
      */
     private function get(string $path): ?array
     {
@@ -92,15 +85,15 @@ final class PeruApiService
                 'X-API-KEY' => $this->apiKey,
                 'Accept' => 'application/json',
             ])
-                ->timeout(8)
+                ->timeout(10)
                 ->retry(3, 1000, throw: false)
                 ->get("{$this->baseUrl}{$path}");
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                // PeruAPI devuelve code 200 cuando encuentra resultados
-                if (isset($data['code']) && $data['code'] !== 200) {
+                // PeruAPI devuelve code 200 (como string o int) cuando encuentra resultados
+                if (isset($data['code']) && (int)$data['code'] !== 200) {
                     Log::warning("PeruAPI: respuesta no exitosa para {$path}", $data);
                     return null;
                 }
@@ -108,16 +101,10 @@ final class PeruApiService
                 return $data;
             }
 
-            // 404 no descuenta crédito — cachear igualmente para no reintentar
-            if ($response->status() === 404) {
-                Log::info("PeruAPI: recurso no encontrado {$path}");
-                return null;
-            }
-
-            // 429 — rate limit
-            if ($response->status() === 429) {
-                Log::warning("PeruAPI: rate limit alcanzado para {$path}");
-                return null;
+            // Si falla con 401, logueamos el mensaje específico de la API (ej: IP no autorizada)
+            if ($response->status() === 401) {
+                $errorMsg = $response->json()['mensaje'] ?? 'No autorizado';
+                Log::error("PeruAPI: error 401 - {$errorMsg}");
             }
 
             Log::error("PeruAPI: error HTTP {$response->status()} para {$path}");

@@ -111,10 +111,10 @@ class Index extends Component
 
         if ($this->tipo_documento === 'DNI') {
             $data = $peruApiService->consultarDni($this->numero_documento);
-            if ($data && isset($data['data'])) {
-                $this->nombres = mb_convert_case($data['data']['nombres'] ?? '', MB_CASE_TITLE, 'UTF-8');
+            if ($data && isset($data['nombres'])) {
+                $this->nombres = mb_convert_case($data['nombres'] ?? '', MB_CASE_TITLE, 'UTF-8');
                 $this->apellidos = mb_convert_case(
-                    trim(($data['data']['apellido_paterno'] ?? '') . ' ' . ($data['data']['apellido_materno'] ?? '')),
+                    trim(($data['apellido_paterno'] ?? '') . ' ' . ($data['apellido_materno'] ?? '')),
                     MB_CASE_TITLE,
                     'UTF-8'
                 );
@@ -124,14 +124,19 @@ class Index extends Component
             }
         } elseif ($this->tipo_documento === 'RUC') {
             $data = $peruApiService->consultarRuc($this->numero_documento);
-            if ($data && isset($data['data'])) {
-                $this->nombres = mb_convert_case($data['data']['nombre_o_razon_social'] ?? '', MB_CASE_TITLE, 'UTF-8');
+            if ($data && isset($data['razon_social'])) {
+                $this->nombres = mb_convert_case($data['razon_social'] ?? '', MB_CASE_TITLE, 'UTF-8');
                 $this->apellidos = ''; // RUC no usa apellidos
-                $this->direccion = $data['data']['direccion_completa'] ?? '';
+                $this->direccion = $data['direccion'] ?? '';
                 
-                // Si la API devuelve un ubigeo, lo despachamos al componente UbigeoSelector
-                if (!empty($data['data']['ubigeo'][2])) {
-                    $this->codigo_ubigeo = (string) $data['data']['ubigeo'][2];
+                // Si la API devuelve un ubigeo como código o array con código
+                if (!empty($data['ubigeo'])) {
+                    if (is_array($data['ubigeo'])) {
+                        // A veces es [dep, prov, dist, code] o similar
+                        $this->codigo_ubigeo = (string) end($data['ubigeo']);
+                    } else {
+                        $this->codigo_ubigeo = (string) $data['ubigeo'];
+                    }
                     $this->dispatch('preseleccionarUbigeo', codigo_ubigeo: $this->codigo_ubigeo);
                 }
                 $this->success('Datos obtenidos de SUNAT.');

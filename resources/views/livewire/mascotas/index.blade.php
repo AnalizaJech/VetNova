@@ -102,20 +102,25 @@
         <x-form wire:submit="save">
             
             {{-- Propietario (Búsqueda Asíncrona) --}}
-            <x-choices
-                label="Cliente Propietario"
-                wire:model="cliente_id"
-                :options="$clientesSearch"
-                search-function="buscarClientes"
-                option-label="nombre_completo"
-                option-sub-label="numero_documento"
-                option-value="id"
-                placeholder="Busca por nombre o documento..."
-                no-result-text="No se encontraron clientes"
-                searchable
-                single
-                icon="o-user"
-            />
+            <div wire:key="client-selector-container">
+                <x-choices
+                    label="Cliente Propietario"
+                    wire:model="cliente_id"
+                    :options="$clientesSearch"
+                    search-function="buscarClientes"
+                    option-label="nombre_completo"
+                    option-sub-label="numero_documento"
+                    option-value="id"
+                    placeholder="Busca por nombre o documento..."
+                    no-result-text="No se encontraron clientes"
+                    searchable
+                    single
+                    clearable
+                    debounce="300ms"
+                    icon="o-user"
+                    wire:key="client-selector-{{ $mascota_id ?? 'new' }}"
+                />
+            </div>
 
             <x-hr />
 
