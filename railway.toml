@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "php artisan migrate --force && apache2-foreground"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

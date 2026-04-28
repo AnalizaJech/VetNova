@@ -1,0 +1,10 @@
+# Configuración de construcción para Railway
+[phases.build]
+cmds = [
+    "composer install --no-dev --optimize-autoloader",
+    "npm install",
+    "npm run build"
+]
+
+[start]
+cmd = "php artisan migrate --force && apache2-foreground"
