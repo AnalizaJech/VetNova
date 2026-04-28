@@ -1,13 +1,13 @@
 # ============================================================
 # railway.toml — Configuración de Railway
-# Coloca este archivo en la RAÍZ de tu proyecto Laravel
+# Coloca en la RAÍZ del proyecto (junto a composer.json)
 # ============================================================
-
+ 
 [build]
 builder = "NIXPACKS"
-
+ 
 [deploy]
-healthcheckPath = "/login"
-healthcheckTimeout = 60
+# Sin healthcheck para el primer deploy — una vez que funcione
+# puedes re-activarlo apuntando a /health
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3

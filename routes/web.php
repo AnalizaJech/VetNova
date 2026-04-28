@@ -5,6 +5,29 @@ use App\Livewire\Dashboard;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
+// Agrega esta ruta al INICIO de routes/web.php, antes de cualquier middleware
+// Es una ruta pública que Railway usa para verificar que el servidor responde
+ 
+use Illuminate\Support\Facades\DB;
+ 
+Route::get('/health', function () {
+    // Verifica que la app y la DB estén operativas
+    try {
+        DB::connection()->getPdo();
+        return response()->json([
+            'status' => 'ok',
+            'app'    => config('app.name'),
+            'env'    => config('app.env'),
+            'db'     => 'connected',
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'db'     => 'disconnected',
+        ], 503);
+    }
+})->name('health');
+
 Route::middleware('guest')->group(function () {
     Route::get('/', Login::class)->name('login');
 });
