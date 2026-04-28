@@ -1,7 +1,10 @@
 # Configuración Nixpacks para Laravel en Railway
+<<<<<<< HEAD
 [phases.setup]
 nixPkgs = ["php82", "php82Packages.composer", "nodejs_20", "libmysqlclient"]
 
+=======
+>>>>>>> ef7ca835c991d56e3c6dd598e32a8e53cf8528b4
 [phases.build]
 cmds = [
     "composer install --no-dev --optimize-autoloader",
@@ -10,4 +13,10 @@ cmds = [
     "php artisan optimize"
 ]
 
+<<<<<<< HEAD
 # Las migraciones se ejecutan mediante el preDeployCommand en railway.toml
+=======
+# Las migraciones NO deben ir aquí. Se deben configurar en el 
+# "Pre-Deploy Command" del panel de Railway:
+# Comand: chmod +x ./railway/init-app.sh && ./railway/init-app.sh
+>>>>>>> ef7ca835c991d56e3c6dd598e32a8e53cf8528b4
