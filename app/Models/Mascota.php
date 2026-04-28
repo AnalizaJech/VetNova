@@ -63,6 +63,15 @@ class Mascota extends Model
         return "{$diff->d} días";
     }
 
+    public function getDescripcionSelectorAttribute(): string
+    {
+        $raza = $this->raza ? " ({$this->raza})" : '';
+        $especie = $this->especie;
+        $genero = $this->sexo === 'M' ? 'Macho' : 'Hembra';
+        $dueno = $this->cliente?->nombres . ' ' . $this->cliente?->apellidos;
+        return "{$especie}{$raza} · {$genero} · Dueño: {$dueno}";
+    }
+
     // ── Relaciones ──
 
     public function clinica(): BelongsTo

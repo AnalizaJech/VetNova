@@ -23,12 +23,18 @@ class Cita extends Model
         'motivo',
         'estado',
         'notas',
+        'notificado_sms',
+        'notificado_whatsapp',
+        'notificado_email',
     ];
 
     protected function casts(): array
     {
         return [
             'fecha_hora' => 'datetime',
+            'notificado_sms' => 'boolean',
+            'notificado_whatsapp' => 'boolean',
+            'notificado_email' => 'boolean',
         ];
     }
 
@@ -65,5 +71,10 @@ class Cita extends Model
     public function veterinario(): BelongsTo
     {
         return $this->belongsTo(User::class, 'veterinario_id');
+    }
+
+    public function historiaClinica(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\HistoriaClinica::class, 'cita_id');
     }
 }

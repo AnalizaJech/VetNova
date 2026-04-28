@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -81,7 +82,7 @@ class Index extends Component
     public function buscarClientes(string $value = ''): void
     {
         $this->clientesSearch = Cliente::query()
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->where('activo', true)
             ->when($value, function (Builder $query) use ($value) {
                 $query->where(function ($q) use ($value) {
@@ -111,11 +112,17 @@ class Index extends Component
 
     private function cargarVeterinarios(): void
     {
-        // En un caso real, filtramos solo los usuarios con rol 'veterinario'
-        // Por simplicidad en Fase 1, cargaremos a todos los usuarios de la clínica
-        $this->veterinariosSelect = User::where('clinica_id', auth()->user()->clinica_id)
-            ->where('activo', true)
-            ->get();
+        try {
+            $this->veterinariosSelect = User::role('veterinario')
+                ->where('clinica_id', Auth::user()->clinica_id)
+                ->where('activo', true)
+                ->get();
+        } catch (\Exception $e) {
+            // Fallback si el rol no existe
+        $this->veterinariosSelect = User::where('clinica_id', Auth::user()->clinica_id)
+                ->where('activo', true)
+                ->get();
+        }
     }
 
     public function create(): void
@@ -162,29 +169,33 @@ class Index extends Component
         $this->validate([
             'cliente_id' => 'required|exists:clientes,id',
             'mascota_id' => 'required|exists:mascotas,id',
-            'veterinario_id' => 'nullable|exists:users,id',
+            'veterinario_id' => 'required|exists:users,id',
             'fecha' => 'required|date',
             'hora' => 'required|date_format:H:i',
             'motivo' => 'required|string|max:150',
             'estado' => 'required|string',
         ], [
             'mascota_id.required' => 'Debes seleccionar una mascota paciente.',
+            'veterinario_id.required' => 'Debes asignar un veterinario para la cita.',
         ]);
 
-        $clinica_id = auth()->user()->clinica_id;
+        $clinica_id = Auth::user()->clinica_id;
         $fecha_hora = Carbon::parse("{$this->fecha} {$this->hora}");
 
-        // Validación simple de cruce de horarios para el mismo veterinario
-        if ($this->veterinario_id && in_array($this->estado, ['PENDIENTE', 'CONFIRMADA'])) {
+        // Validación de cruce de horarios para el mismo veterinario (±30 minutos)
+        if ($this->veterinario_id && in_array($this->estado, ['PENDIENTE', 'CONFIRMADA', 'EN_PROGRESO'])) {
+            $inicio = $fecha_hora->copy()->subMinutes(29);
+            $fin    = $fecha_hora->copy()->addMinutes(29);
+
             $cruce = Cita::where('clinica_id', $clinica_id)
                 ->where('veterinario_id', $this->veterinario_id)
-                ->where('fecha_hora', $fecha_hora)
-                ->whereIn('estado', ['PENDIENTE', 'CONFIRMADA'])
+                ->whereBetween('fecha_hora', [$inicio, $fin])
+                ->whereIn('estado', ['PENDIENTE', 'CONFIRMADA', 'EN_PROGRESO'])
                 ->when($this->cita_id, fn($q) => $q->where('id', '!=', $this->cita_id))
                 ->exists();
 
             if ($cruce) {
-                $this->addError('hora', 'El veterinario ya tiene una cita reservada a esta hora exacta.');
+                $this->addError('hora', 'El veterinario ya tiene una cita dentro de los 30 minutos de este horario.');
                 return;
             }
         }
@@ -204,19 +215,80 @@ class Index extends Component
             Cita::where('clinica_id', $clinica_id)->findOrFail($this->cita_id)->update($data);
             $this->success('Cita actualizada correctamente.');
         } else {
-            Cita::create($data);
+            $cita = Cita::create($data);
             $this->success('Cita registrada correctamente.');
+            
+            // Enviar notificaciones automáticas
+            $this->enviarNotificacionesAutomaticas($cita, app(\App\Services\NotificationService::class));
         }
 
         $this->modalModal = false;
         $this->resetForm();
     }
 
+    private function enviarNotificacionesAutomaticas(Cita $cita, \App\Services\NotificationService $notifications): void
+    {
+        $cliente = $cita->cliente;
+        if (!$cliente) return;
+
+        $msg = "Hola {$cliente->nombres}, recordatorio de cita para {$cita->mascota->nombre} el {$cita->fecha_hora->format('d/m/Y')} a las {$cita->fecha_hora->format('h:i A')}. Motivo: {$cita->motivo}. ¡Te esperamos en VetNova!";
+
+        // WhatsApp
+        if ($cliente->telefono) {
+            $cita->notificado_whatsapp = $notifications->sendWhatsApp($cliente->telefono, $msg);
+        }
+
+        // SMS
+        if ($cliente->telefono) {
+            $cita->notificado_sms = $notifications->sendSMS($cliente->telefono, $msg);
+        }
+
+        // Email
+        if ($cliente->email) {
+            $html = "
+                <div style='font-family: sans-serif; padding: 20px; color: #333;'>
+                    <h2 style='color: #4f46e5;'>Confirmación de Cita — VetNova</h2>
+                    <p>Hola <strong>{$cliente->nombres}</strong>,</p>
+                    <p>Se ha agendado una cita para <strong>{$cita->mascota->nombre}</strong>:</p>
+                    <div style='background: #f3f4f6; padding: 15px; border-radius: 10px; margin: 20px 0;'>
+                        <p>📅 <strong>Fecha:</strong> {$cita->fecha_hora->format('d/m/Y')}</p>
+                        <p>⏰ <strong>Hora:</strong> {$cita->fecha_hora->format('h:i A')}</p>
+                        <p>🩺 <strong>Motivo:</strong> {$cita->motivo}</p>
+                    </div>
+                    <p>¡Te esperamos!</p>
+                </div>
+            ";
+            $cita->notificado_email = $notifications->sendEmail($cliente->email, "Confirmación de Cita — VetNova", $html);
+        }
+
+        $cita->save();
+    }
+
     public function cambiarEstado(int $id, string $nuevoEstado): void
     {
-        $cita = Cita::where('clinica_id', auth()->user()->clinica_id)->findOrFail($id);
+        $cita = Cita::where('clinica_id', Auth::user()->clinica_id)->findOrFail($id);
         $cita->update(['estado' => $nuevoEstado]);
         $this->success("Estado actualizado a {$nuevoEstado}.");
+    }
+
+    public function iniciarAtencion(int $id): void
+    {
+        $cita = Cita::with(['mascota'])->where('clinica_id', Auth::user()->clinica_id)
+            ->whereIn('estado', ['PENDIENTE', 'CONFIRMADA', 'EN_PROGRESO'])
+            ->findOrFail($id);
+
+        // Verificar si ya tiene historia clínica registrada
+        $historiaExiste = \App\Models\HistoriaClinica::where('cita_id', $id)->exists();
+        if ($historiaExiste) {
+            $this->warning('Esta cita ya tiene una historia clínica registrada. Edítala desde el módulo Historias.');
+            return;
+        }
+
+        // Marcar como EN_PROGRESO
+        $cita->update(['estado' => 'EN_PROGRESO']);
+
+        // Redirigir a historias pasando el contexto via query string
+        $this->redirect(route('historias') . "?cita_id={$cita->id}&mascota_id={$cita->mascota_id}&from=agenda");
     }
 
     private function resetForm(): void
@@ -244,7 +316,8 @@ class Index extends Component
     public function getCitasProperty(): LengthAwarePaginator
     {
         return Cita::with(['cliente', 'mascota', 'veterinario'])
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->withCount('historiaClinica')
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->when($this->filtroFecha, function (Builder $query) {
                 $query->whereDate('fecha_hora', $this->filtroFecha);
             })

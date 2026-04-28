@@ -1,36 +1,52 @@
 <div>
     {{-- Header y Filtros --}}
     <x-header title="Agenda de Citas" subtitle="Programación de pacientes" separator>
-        <x-slot:middle class="!justify-end gap-2">
-            {{-- Filtro de fecha rápida --}}
-            <x-input type="date" wire:model.live="filtroFecha" icon="o-calendar" class="w-40" />
-            
-            {{-- Filtro de estado --}}
-            <x-select wire:model.live="filtroEstado" :options="$estados" placeholder="Todos los estados" class="w-48" icon="o-funnel" />
-            
-            <x-input icon="o-magnifying-glass" placeholder="Buscar..." wire:model.live.debounce.500ms="search" clearable class="w-48 lg:w-64" />
-        </x-slot:middle>
         <x-slot:actions>
             <x-button icon="o-plus" class="btn-primary" wire:click="create" label="Agendar Cita" responsive />
         </x-slot:actions>
     </x-header>
+
+    {{-- Filtros Avanzados --}}
+    <div class="bg-base-100 p-4 rounded-2xl shadow-sm border border-base-200 mb-6 flex flex-wrap items-center gap-4">
+        <div class="hidden md:flex items-center gap-2">
+            <x-icon name="o-funnel" class="w-5 h-5 text-primary/70" />
+            <span class="font-bold text-sm">Filtros:</span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+            <x-input type="date" wire:model.live="filtroFecha" icon="o-calendar" label="Fecha" class="input-sm" />
+            <x-select wire:model.live="filtroEstado" :options="$estados" placeholder="Todos los estados" icon="o-check-circle" label="Estado" class="select-sm" />
+            <x-input icon="o-magnifying-glass" placeholder="Buscar paciente o dueño..." wire:model.live.debounce.500ms="search" clearable label="Búsqueda rápida" class="input-sm" />
+        </div>
+    </div>
 
     {{-- Stats Rápidos del Día (Se oculta si no filtramos por una fecha exacta) --}}
     @if($filtroFecha)
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             @php
                 $pendientes = $citas->whereIn('estado', ['PENDIENTE', 'CONFIRMADA'])->count();
+                $enProgreso = $citas->where('estado', 'EN_PROGRESO')->count();
                 $completadas = $citas->where('estado', 'COMPLETADA')->count();
+                $noAsistio = $citas->where('estado', 'NO_ASISTIO')->count();
             @endphp
             <div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200">
                 <p class="text-sm text-base-content/60">Por Atender</p>
                 <p class="text-2xl font-bold font-heading text-primary">{{ $pendientes }}</p>
             </div>
             <div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200">
+                <p class="text-sm text-base-content/60">En Progreso</p>
+                <p class="text-2xl font-bold font-heading text-info">{{ $enProgreso }}</p>
+            </div>
+            <div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200">
                 <p class="text-sm text-base-content/60">Completadas</p>
                 <p class="text-2xl font-bold font-heading text-success">{{ $completadas }}</p>
             </div>
+            <div class="bg-base-100 p-4 rounded-xl shadow-sm border border-base-200">
+                <p class="text-sm text-base-content/60">No Asistieron</p>
+                <p class="text-2xl font-bold font-heading text-error">{{ $noAsistio }}</p>
+            </div>
         </div>
+        <div class="text-[10px] text-base-content/40 mb-2 px-1">(en esta página)</div>
     @endif
 
     {{-- Tabla --}}
@@ -46,7 +62,9 @@
             {{-- Columna Paciente --}}
             @scope('cell_paciente', $cita)
                 <div class="flex items-center gap-3">
-                    <div class="font-semibold text-base-content">{{ $cita->mascota->nombre ?? 'N/A' }}</div>
+                    <a href="{{ route('mascotas.perfil', $cita->mascota_id) }}" class="font-semibold text-primary hover:underline" wire:navigate>
+                        {{ $cita->mascota->nombre ?? 'N/A' }}
+                    </a>
                 </div>
                 <div class="text-xs text-base-content/60 mt-1">
                     Dueño: {{ $cita->cliente->nombres ?? 'N/A' }}
@@ -76,12 +94,25 @@
                     };
                 @endphp
                 <x-badge :value="$cita->estado" class="{{ $color }} badge-sm font-semibold" />
+                @if($cita->historia_clinica_count > 0)
+                    <x-badge icon="o-check-circle" value="Historia OK" class="badge-success badge-sm font-semibold ml-1" />
+                @endif
             @endscope
 
             {{-- Acciones y Cambios de estado rápidos --}}
             @scope('actions', $cita)
                 <div class="flex items-center gap-2">
                     
+                    @if(in_array($cita->estado, ['PENDIENTE', 'CONFIRMADA', 'EN_PROGRESO']))
+                        <x-button
+                            icon="o-play"
+                            wire:click="iniciarAtencion({{ $cita->id }})"
+                            class="btn-success btn-sm"
+                            tooltip="Iniciar consulta y crear historia clínica"
+                            label="Atender"
+                            responsive
+                        />
+                    @endif
                     {{-- Dropdown de cambio rápido de estado --}}
                     @if(in_array($cita->estado, ['PENDIENTE', 'CONFIRMADA', 'EN_PROGRESO']))
                         <x-dropdown icon="o-chevron-down" class="btn-sm btn-ghost">
@@ -93,6 +124,14 @@
                             <x-menu-separator />
                             <x-menu-item title="No Asistió" icon="o-x-mark" wire:click="cambiarEstado({{ $cita->id }}, 'NO_ASISTIO')" class="text-error" />
                         </x-dropdown>
+                    @endif
+
+                    @if($cita->estado === 'CONFIRMADA')
+                        <x-button icon="o-phone" link="tel:{{ $cita->cliente->telefono }}" class="btn-ghost btn-sm text-success" tooltip="Llamar al cliente" />
+                    @endif
+
+                    @if($cita->estado === 'COMPLETADA')
+                        <x-button icon="o-document-magnifying-glass" link="{{ route('historias', ['search' => $cita->mascota->nombre]) }}" wire:navigate class="btn-ghost btn-sm text-primary" tooltip="Ver Historia" />
                     @endif
 
                     <x-button icon="o-pencil" wire:click="edit({{ $cita->id }})" class="btn-ghost btn-sm text-info" tooltip="Editar" />
@@ -134,6 +173,7 @@
                 wire:model="mascota_id"
                 :options="$mascotasSelect"
                 option-label="nombre"
+                option-sub-label="descripcion_selector"
                 option-value="id"
                 placeholder="Seleccione la mascota"
                 single
@@ -155,12 +195,12 @@
                 <x-input label="Motivo de consulta" wire:model="motivo" placeholder="Ej. Vacuna Quintuple" />
                 
                 <x-choices-offline
-                    label="Veterinario Asignado"
+                    label="Veterinario Asignado *"
                     wire:model="veterinario_id"
                     :options="$veterinariosSelect"
                     option-label="name"
                     option-value="id"
-                    placeholder="Opcional"
+                    placeholder="Seleccione veterinario..."
                     single
                     clearable
                 />

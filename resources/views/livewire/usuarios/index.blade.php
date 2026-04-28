@@ -17,14 +17,8 @@
         <x-table :headers="$headers" :rows="$users" striped @row-click="">
             {{-- Columna Nombre --}}
             @scope('cell_name', $user)
-                <div class="flex items-center gap-3">
-                    <div class="avatar placeholder">
-                        <div class="bg-primary/20 text-primary rounded-full w-9 flex items-center justify-center">
-                            <span class="text-sm font-bold">{{ substr($user->name, 0, 1) }}</span>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="font-semibold text-base-content">{{ $user->name }}</p>
+                <div>
+                    <p class="font-semibold text-base-content">{{ $user->name }}</p>
                         @if($user->dni)
                             <p class="text-xs text-base-content/50">DNI: {{ $user->dni }}</p>
                         @endif

@@ -20,22 +20,39 @@ class Index extends Component
     public array $chartVentas = [];
     public array $chartCitas = [];
     public array $topProductos = [];
+    public float $ingresosMes = 0;
+    public bool $cargando = true;
+    public string $errorMensaje = '';
 
-    public function mount()
+    public function mount(): void {}
+
+    public function cargarDatos(): void
     {
         $clinica_id = auth()->user()->clinica_id;
         
-        // 1. Ingresos últimos 7 días
+        // 1. Ingresos últimos 7 días (Optimizado: 1 sola query)
+        $ventasPorDia = Venta::select(
+                DB::raw('DATE(created_at) as dia'),
+                DB::raw('SUM(total) as total')
+            )
+            ->where('clinica_id', $clinica_id)
+            ->where('estado', 'PAGADO')
+            ->whereBetween('created_at', [
+                Carbon::today()->subDays(6)->startOfDay(),
+                Carbon::today()->endOfDay()
+            ])
+            ->groupBy('dia')
+            ->orderBy('dia', 'asc')
+            ->get()
+            ->keyBy('dia');
+
         $fechas = [];
         $totales = [];
         for ($i = 6; $i >= 0; $i--) {
             $fecha = Carbon::today()->subDays($i);
+            $key = $fecha->format('Y-m-d');
             $fechas[] = $fecha->format('d/m');
-            $total = Venta::where('clinica_id', $clinica_id)
-                ->whereDate('created_at', $fecha)
-                ->where('estado', 'PAGADO')
-                ->sum('total');
-            $totales[] = (float) $total;
+            $totales[] = (float) ($ventasPorDia[$key]->total ?? 0);
         }
 
         $this->chartVentas = [
@@ -102,6 +119,15 @@ class Index extends Component
             ->take(5)
             ->get()
             ->toArray();
+
+        // 4. Ingresos del mes actual
+        $this->ingresosMes = (float) Venta::where('clinica_id', $clinica_id)
+            ->where('estado', 'PAGADO')
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->sum('total');
+
+        $this->cargando = false;
     }
 
     public function render()

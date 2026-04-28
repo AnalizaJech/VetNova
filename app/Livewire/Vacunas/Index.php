@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -69,7 +70,7 @@ class Index extends Component
     {
         $this->mascotasSearch = Mascota::query()
             ->with('cliente')
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->where('fallecido', false)
             ->when($value, function (Builder $query) use ($value) {
                 $query->where('nombre', 'like', "%{$value}%")
@@ -145,12 +146,12 @@ class Index extends Component
             'fecha_proxima' => 'nullable|date|after_or_equal:fecha_aplicacion',
         ]);
 
-        $clinica_id = auth()->user()->clinica_id;
+        $clinica_id = Auth::user()->clinica_id;
 
         $data = [
             'clinica_id' => $clinica_id,
             'mascota_id' => $this->mascota_id,
-            'veterinario_id' => auth()->id(), // Quien registra la vacuna
+            'veterinario_id' => Auth::id(), // Quien registra la vacuna
             'tipo' => $this->tipo,
             'producto_o_enfermedad' => $this->producto_o_enfermedad,
             'lote_marca' => $this->lote_marca,
@@ -182,7 +183,7 @@ class Index extends Component
 
     public function delete(int $id): void
     {
-        $registro = RegistroPreventivo::where('clinica_id', auth()->user()->clinica_id)->findOrFail($id);
+        $registro = RegistroPreventivo::where('clinica_id', Auth::user()->clinica_id)->findOrFail($id);
         $registro->delete();
         $this->warning('Registro eliminado correctamente.');
     }
@@ -211,7 +212,7 @@ class Index extends Component
     public function getRegistrosProperty(): LengthAwarePaginator
     {
         return RegistroPreventivo::with(['mascota.cliente'])
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->when($this->filtroTipo, function (Builder $query) {
                 $query->where('tipo', $this->filtroTipo);
             })

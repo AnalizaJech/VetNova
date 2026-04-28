@@ -1,13 +1,22 @@
 <div>
     {{-- Header --}}
     <x-header title="Mascotas" subtitle="Registro de pacientes" separator>
-        <x-slot:middle class="!justify-end">
-            <x-input icon="o-magnifying-glass" placeholder="Buscar por mascota o dueño..." wire:model.live.debounce.500ms="search" clearable />
-        </x-slot:middle>
         <x-slot:actions>
             <x-button icon="o-plus" class="btn-primary" wire:click="create" label="Nueva Mascota" responsive />
         </x-slot:actions>
     </x-header>
+
+    <div class="bg-base-100 p-4 rounded-2xl shadow-sm border border-base-200 mb-6 flex flex-wrap items-center gap-4">
+        <div class="hidden md:flex items-center gap-2">
+            <x-icon name="o-funnel" class="w-5 h-5 text-primary/70" />
+            <span class="font-bold text-sm">Filtros:</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
+            <x-select wire:model.live="filtroEspecie" :options="$especies" placeholder="Todas las especies" icon="o-tag" class="select-sm" />
+            <x-select wire:model.live="filtroSexo" :options="$sexos" placeholder="Ambos sexos" icon="o-users" class="select-sm" />
+            <x-input icon="o-magnifying-glass" placeholder="Buscar por mascota, dueño o DNI..." wire:model.live.debounce.500ms="search" clearable class="input-sm md:col-span-2" />
+        </div>
+    </div>
 
     {{-- Tabla --}}
     <x-card class="shadow-sm">
@@ -16,18 +25,10 @@
             {{-- Columna Mascota --}}
             @scope('cell_mascota', $mascota)
                 <div class="flex items-center gap-3">
-                    <div class="avatar placeholder">
-                        <div class="bg-neutral text-neutral-content rounded-full w-10">
-                            <span class="text-xl">
-                                @if($mascota->especie === 'Perro') <x-icon name="o-star" class="w-6 h-6" />
-                                @elseif($mascota->especie === 'Gato') <x-icon name="o-moon" class="w-6 h-6" />
-                                @elseif($mascota->especie === 'Ave') <x-icon name="o-paper-airplane" class="w-6 h-6" />
-                                @else <x-icon name="o-heart" class="w-6 h-6" /> @endif
-                            </span>
-                        </div>
-                    </div>
                     <div>
-                        <div class="font-bold text-base-content">{{ $mascota->nombre }}</div>
+                        <a href="{{ route('mascotas.perfil', $mascota) }}" class="font-bold text-primary hover:underline" wire:navigate>
+                            {{ $mascota->nombre }}
+                        </a>
                         <div class="text-xs text-base-content/60 flex items-center gap-1">
                             @if($mascota->sexo === 'M') <x-icon name="o-user" class="w-3 h-3 text-info inline" /> Macho @else <x-icon name="o-user" class="w-3 h-3 text-pink-500 inline" /> Hembra @endif
                             @if($mascota->edad_readable !== 'Desconocida')
@@ -88,9 +89,11 @@
                 <div class="flex items-center gap-1">
                     <x-button icon="o-clipboard-document-list" link="{{ route('historias', ['search' => $mascota->nombre]) }}" wire:navigate class="btn-ghost btn-sm text-primary" tooltip="Historia Clínica" />
                     <x-button icon="o-pencil" wire:click="edit({{ $mascota->id }})" class="btn-ghost btn-sm text-info" tooltip="Editar" />
-                    <x-button icon="o-trash" class="btn-ghost btn-sm text-error" tooltip="Eliminar"
-                        wire:confirm="¿Estás seguro de eliminar a {{ $mascota->nombre }}?"
-                        wire:click="delete({{ $mascota->id }})" />
+                    @if(!$mascota->fallecido)
+                        <x-button icon="o-no-symbol" class="btn-ghost btn-sm text-error" tooltip="Marcar como fallecido"
+                            wire:confirm="¿Marcar a {{ $mascota->nombre }} como fallecido? El historial médico se conservará."
+                            wire:click="marcarFallecido({{ $mascota->id }})" />
+                    @endif
                 </div>
             @endscope
         </x-table>
@@ -135,8 +138,8 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <x-input label="Raza" wire:model="raza" placeholder="Ej. Golden Retriever" />
-                <x-input label="Color" wire:model="color" placeholder="Ej. Dorado" />
+                <x-input label="Raza (opcional)" wire:model="raza" placeholder="Ej. Golden Retriever" hint="Puedes dejarlo en blanco" />
+                <x-input label="Color (opcional)" wire:model="color" placeholder="Ej. Dorado" hint="Puedes dejarlo en blanco" />
             </div>
 
             {{-- Biometría --}}

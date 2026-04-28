@@ -24,6 +24,8 @@ class Prescripcion extends Model
         'producto_id',
         'medicamento',
         'dosis',
+        'frecuencia',
+        'duracion',
         'via_administracion',
         'duracion_dias',
         'indicaciones',

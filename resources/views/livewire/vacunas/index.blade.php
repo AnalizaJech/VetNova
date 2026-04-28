@@ -1,14 +1,21 @@
 <div>
     {{-- Header --}}
     <x-header title="Medicina Preventiva" subtitle="Control de vacunas y desparasitaciones" separator>
-        <x-slot:middle class="!justify-end gap-2">
-            <x-select wire:model.live="filtroTipo" :options="$tipos" placeholder="Todos los tipos" class="w-48 md:w-56" icon="o-funnel" />
-            <x-input icon="o-magnifying-glass" placeholder="Buscar mascota o producto..." wire:model.live.debounce.500ms="search" clearable class="w-full md:w-64" />
-        </x-slot:middle>
         <x-slot:actions>
             <x-button icon="o-plus" class="btn-primary" wire:click="create" label="Nuevo Registro" responsive />
         </x-slot:actions>
     </x-header>
+
+    <div class="bg-base-100 p-4 rounded-2xl shadow-sm border border-base-200 mb-6 flex flex-wrap items-center gap-4">
+        <div class="hidden md:flex items-center gap-2">
+            <x-icon name="o-funnel" class="w-5 h-5 text-primary/70" />
+            <span class="font-bold text-sm">Filtros:</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+            <x-select wire:model.live="filtroTipo" :options="$tipos" placeholder="Todos los tipos" icon="o-tag" class="select-sm" />
+            <x-input icon="o-magnifying-glass" placeholder="Buscar mascota o producto..." wire:model.live.debounce.500ms="search" clearable class="input-sm md:col-span-2" />
+        </div>
+    </div>
 
     {{-- Tabla --}}
     <x-card class="shadow-sm">
@@ -94,6 +101,7 @@
                     :options="$mascotasSearch"
                     search-function="buscarMascotas"
                     option-label="nombre"
+                    option-sub-label="descripcion_selector"
                     option-value="id"
                     placeholder="Busca por mascota o dueño..."
                     searchable

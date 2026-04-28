@@ -9,6 +9,7 @@ use App\Models\Mascota;
 use App\Models\Producto;
 use App\Models\Venta;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -19,7 +20,7 @@ class Dashboard extends Component
 {
     public function render()
     {
-        $clinica_id = auth()->user()->clinica_id;
+        $clinica_id = Auth::user()->clinica_id;
         $hoy = Carbon::today();
 
         // 1. Estadísticas Generales
@@ -32,9 +33,10 @@ class Dashboard extends Component
             ->whereDate('fecha_hora', $hoy)
             ->count();
 
+        $inicioMes = $hoy->copy()->startOfMonth();
+        $finMes    = $hoy->copy()->endOfMonth();
         $nuevosPacientes = Mascota::where('clinica_id', $clinica_id)
-            ->whereMonth('created_at', $hoy->month)
-            ->whereYear('created_at', $hoy->year)
+            ->whereBetween('created_at', [$inicioMes, $finMes])
             ->count();
 
         $alertasStock = Producto::where('clinica_id', $clinica_id)

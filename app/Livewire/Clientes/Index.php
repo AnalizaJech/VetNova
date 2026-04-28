@@ -9,6 +9,7 @@ use App\Models\UbigeoDistrito;
 use App\Services\PeruApiService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -161,7 +162,7 @@ class Index extends Component
             'telefono' => 'nullable|string|max:20',
         ]);
 
-        $clinica_id = auth()->user()->clinica_id;
+        $clinica_id = Auth::user()->clinica_id;
 
         // Validar unicidad manual para scope de clínica
         $existe = Cliente::where('clinica_id', $clinica_id)
@@ -211,7 +212,7 @@ class Index extends Component
 
     public function delete(int $id): void
     {
-        $cliente = Cliente::where('clinica_id', auth()->user()->clinica_id)->findOrFail($id);
+        $cliente = Cliente::where('clinica_id', Auth::user()->clinica_id)->findOrFail($id);
         $cliente->delete();
         $this->warning('Cliente eliminado correctamente.');
     }
@@ -242,7 +243,8 @@ class Index extends Component
     public function getClientesProperty(): LengthAwarePaginator
     {
         return Cliente::query()
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->with(['distrito'])
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->when($this->search, function (Builder $query) {
                 $query->where(function ($q) {
                     $q->where('nombres', 'like', "%{$this->search}%")

@@ -26,6 +26,9 @@ class RegistroPreventivo extends Model
         'fecha_aplicacion',
         'fecha_proxima',
         'notas',
+        'notificado_sms',
+        'notificado_whatsapp',
+        'notificado_email',
     ];
 
     protected function casts(): array
@@ -34,6 +37,9 @@ class RegistroPreventivo extends Model
             'fecha_aplicacion' => 'date',
             'fecha_proxima' => 'date',
             'peso_al_momento' => 'decimal:2',
+            'notificado_sms' => 'boolean',
+            'notificado_whatsapp' => 'boolean',
+            'notificado_email' => 'boolean',
         ];
     }
 

@@ -20,13 +20,10 @@
                     {{-- Cabecera Card --}}
                     <div class="flex justify-between items-start mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="avatar placeholder">
-                                <div class="bg-warning/20 text-warning rounded-full w-12 flex items-center justify-center">
-                                    <x-icon name="o-star" class="w-6 h-6" />
-                                </div>
-                            </div>
                             <div>
-                                <h3 class="font-bold text-lg leading-none">{{ $hosp->mascota->nombre }}</h3>
+                                <a href="{{ route('mascotas.perfil', $hosp->mascota_id) }}" class="font-bold text-lg leading-none hover:underline text-primary" wire:navigate>
+                                    {{ $hosp->mascota->nombre }}
+                                </a>
                                 <p class="text-xs text-base-content/60 mt-1 truncate max-w-[150px]">
                                     Dueño: {{ $hosp->mascota->cliente->nombres ?? 'N/A' }}
                                 </p>
@@ -75,9 +72,9 @@
                 :options="$mascotasSearch"
                 search-function="buscarMascotas"
                 option-label="nombre"
-                option-sub-label="cliente.nombre_completo"
+                option-sub-label="descripcion_selector"
                 option-value="id"
-                placeholder="Busca el nombre del paciente..."
+                placeholder="Busca nombre de mascota o DNI del dueño..."
                 no-result-text="No se encontraron mascotas"
                 searchable
                 single

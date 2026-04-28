@@ -1,15 +1,22 @@
 <div>
     {{-- Header --}}
-    <x-header title="Catálogo e Inventario" subtitle="Gestión de productos, medicinas y servicios" separator>
-        <x-slot:middle class="!justify-end gap-2">
-            <x-toggle label="Stock Bajo" wire:model.live="filtroStockBajo" class="toggle-warning toggle-sm" />
-            <x-select wire:model.live="filtroTipo" :options="$tipos" placeholder="Todos" class="w-32 md:w-48" icon="o-funnel" />
-            <x-input icon="o-magnifying-glass" placeholder="Buscar producto o código..." wire:model.live.debounce.500ms="search" clearable class="w-full md:w-64" />
-        </x-slot:middle>
+    <x-header title="Catálogo e Inventario" subtitle="Gestión de productos y servicios" separator>
         <x-slot:actions>
             <x-button icon="o-plus" class="btn-primary" wire:click="create" label="Nuevo Item" responsive />
         </x-slot:actions>
     </x-header>
+
+    <div class="bg-base-100 p-4 rounded-2xl shadow-sm border border-base-200 mb-6 flex flex-wrap items-center gap-4">
+        <div class="hidden md:flex items-center gap-2">
+            <x-icon name="o-funnel" class="w-5 h-5 text-primary/70" />
+            <span class="font-bold text-sm">Filtros:</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+            <x-select wire:model.live="filtroTipo" :options="$tipos" placeholder="Todos los tipos" icon="o-tag" class="select-sm" />
+            <x-toggle label="Sólo Stock Bajo" wire:model.live="filtroStockBajo" class="toggle-warning toggle-sm" />
+            <x-input icon="o-magnifying-glass" placeholder="Buscar por nombre o código..." wire:model.live.debounce.500ms="search" clearable class="input-sm" />
+        </div>
+    </div>
 
     {{-- Tabla principal --}}
     <x-card class="shadow-sm">
@@ -18,15 +25,6 @@
             {{-- Columna Item --}}
             @scope('cell_item', $item)
                 <div class="flex items-center gap-3">
-                    <div class="avatar placeholder hidden sm:flex">
-                        <div class="bg-base-200 text-base-content rounded-xl w-10">
-                            @if($item->tipo === 'SERVICIO')
-                                <x-icon name="o-sparkles" class="w-5 h-5 text-info" />
-                            @else
-                                <x-icon name="o-cube" class="w-5 h-5 text-neutral" />
-                            @endif
-                        </div>
-                    </div>
                     <div>
                         <div class="font-bold text-base-content">{{ $item->nombre }}</div>
                         <div class="text-xs text-base-content/60 flex gap-2 mt-1">
@@ -55,11 +53,9 @@
                     <span class="text-base-content/30 italic text-xs">N/A</span>
                 @else
                     <div class="flex flex-col items-center">
-                        <span class="font-bold text-lg {{ $item->stock_bajo ? 'text-error' : 'text-base-content' }}">
-                            {{ $item->stock_actual }}
-                        </span>
-                        @if($item->stock_bajo)
-                            <span class="text-[10px] text-error uppercase font-semibold">Bajo</span>
+                        <x-badge value="{{ $item->stock_actual }}" class="{{ $item->stock_actual <= $item->stock_minimo ? 'badge-error' : 'badge-neutral' }} font-bold text-lg p-3" />
+                        @if($item->stock_actual <= $item->stock_minimo)
+                            <span class="text-[10px] text-error uppercase font-black mt-1 animate-pulse">Bajo stock</span>
                         @endif
                     </div>
                 @endif
@@ -81,8 +77,8 @@
                         <x-button icon="o-clipboard-document-list" wire:click="verKardex({{ $item->id }})" class="btn-ghost btn-sm text-primary" tooltip="Ver Kardex" spinner />
                     @endif
                     <x-button icon="o-pencil" wire:click="edit({{ $item->id }})" class="btn-ghost btn-sm text-info" tooltip="Editar" spinner />
-                    <x-button icon="o-trash" class="btn-ghost btn-sm text-error" tooltip="Eliminar"
-                        wire:confirm="¿Seguro que deseas eliminar {{ $item->nombre }}?"
+                    <x-button icon="o-archive-box-x-mark" class="btn-ghost btn-sm text-error" tooltip="Archivar / Inactivar"
+                        wire:confirm="¿Seguro que deseas inactivar {{ $item->nombre }}?"
                         wire:click="delete({{ $item->id }})" spinner />
                 </div>
             @endscope

@@ -42,11 +42,6 @@ return [
         'base_url' => env('PERUAPI_BASE_URL', 'https://peruapi.com'),
     ],
 
-    'nubefact' => [
-        'token' => env('NUBEFACT_TOKEN'),
-        'url' => env('NUBEFACT_URL'),
-    ],
-
     'twilio' => [
         'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_TOKEN'),

@@ -97,9 +97,8 @@
                     option-label="nombre_completo"
                     option-sub-label="numero_documento"
                     option-value="id"
-                    placeholder="Público General"
+                    placeholder="Seleccionar cliente (Obligatorio)"
                     searchable
-                    clearable
                     single
                     icon="o-user"
                 />
@@ -109,7 +108,6 @@
             <div class="bg-base-100 p-5 rounded-2xl shadow-sm border border-base-200">
                 <h3 class="font-bold text-sm mb-3">2. Comprobante y Pago</h3>
                 <div class="flex flex-col gap-3">
-                    <x-select wire:model="tipo_comprobante" :options="$comprobantes" icon="o-document-text" />
                     <x-select wire:model="metodo_pago" :options="$metodos_pago" icon="o-banknotes" />
                 </div>
             </div>

@@ -1,13 +1,21 @@
 <div>
     {{-- Header --}}
-    <x-header title="Historias Clínicas" subtitle="Registro de consultas médicas" separator>
-        <x-slot:middle class="!justify-end">
-            <x-input icon="o-magnifying-glass" placeholder="Buscar paciente o motivo..." wire:model.live.debounce.500ms="search" clearable class="w-full md:w-64" />
-        </x-slot:middle>
+    <x-header title="Historias Clínicas" subtitle="Expediente médico electrónico" separator>
         <x-slot:actions>
             <x-button icon="o-plus" class="btn-primary" wire:click="create" label="Nueva Consulta" responsive />
         </x-slot:actions>
     </x-header>
+
+    <div class="bg-base-100 p-4 rounded-2xl shadow-sm border border-base-200 mb-6 flex flex-wrap items-center gap-4">
+        <div class="hidden md:flex items-center gap-2">
+            <x-icon name="o-funnel" class="w-5 h-5 text-primary/70" />
+            <span class="font-bold text-sm">Filtros:</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+            <x-input type="date" wire:model.live="filtroFecha" icon="o-calendar" label="Fecha de consulta" class="input-sm" />
+            <x-input icon="o-magnifying-glass" placeholder="Buscar por paciente, dueño o motivo..." wire:model.live.debounce.500ms="search" clearable label="Búsqueda rápida" class="input-sm md:col-span-2" />
+        </div>
+    </div>
 
     {{-- Tabla principal --}}
     <x-card class="shadow-sm">
@@ -21,7 +29,9 @@
 
             {{-- Columna Paciente --}}
             @scope('cell_paciente', $historia)
-                <div class="font-semibold text-primary">{{ $historia->mascota->nombre ?? 'N/A' }}</div>
+                <a href="{{ route('mascotas.perfil', $historia->mascota_id) }}" class="font-semibold text-primary hover:underline" wire:navigate>
+                    {{ $historia->mascota->nombre ?? 'N/A' }}
+                </a>
                 <div class="text-xs text-base-content/60 mt-1">
                     Dueño: {{ $historia->mascota->cliente->nombres ?? 'N/A' }}
                 </div>
@@ -80,9 +90,9 @@
                             :options="$mascotasSearch"
                             search-function="buscarMascotas"
                             option-label="nombre"
-                            option-sub-label="especie"
+                            option-sub-label="descripcion_selector"
                             option-value="id"
-                            placeholder="Busca el nombre de la mascota..."
+                            placeholder="Busca nombre de mascota o DNI del dueño..."
                             searchable
                             single
                             clearable
@@ -117,6 +127,41 @@
                     
                     <x-textarea label="Tratamiento e Indicaciones" wire:model="tratamiento_indicaciones" rows="3" placeholder="Receta médica, dosificación, recomendaciones en casa..." class="border-success/50 focus:border-success" />
                     
+                    {{-- Sección de Prescripciones --}}
+                    <div class="bg-warning/5 p-4 rounded-xl border border-warning/20">
+                        <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+                            <x-icon name="o-beaker" class="w-4 h-4 text-warning" />
+                            Prescripciones / Receta Médica
+                        </h3>
+                        
+                        {{-- Mini-formulario para agregar líneas --}}
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <x-input label="Medicamento" wire:model="prescripcion_medicamento"
+                                placeholder="Ej. Amoxicilina 250mg" />
+                            <x-input label="Dosis" wire:model="prescripcion_dosis"
+                                placeholder="Ej. 1 tableta" />
+                            <x-input label="Frecuencia" wire:model="prescripcion_frecuencia"
+                                placeholder="Ej. Cada 8 horas" />
+                            <x-input label="Duración" wire:model="prescripcion_duracion"
+                                placeholder="Ej. 7 días" />
+                        </div>
+                        <x-button icon="o-plus" wire:click="agregarPrescripcion"
+                            class="btn-warning btn-sm btn-outline" label="Agregar medicamento" />
+                        
+                        {{-- Lista de prescripciones agregadas --}}
+                        @foreach($prescripciones as $i => $p)
+                            <div class="flex items-center justify-between bg-base-100 p-2 rounded-lg mt-2 shadow-sm">
+                                <div class="text-sm">
+                                    <span class="font-semibold">{{ $p['medicamento'] }}</span>
+                                    <span class="text-base-content/60"> — {{ $p['dosis'] }}</span>
+                                    @if($p['frecuencia']) <span class="text-xs text-base-content/50"> · {{ $p['frecuencia'] }}</span> @endif
+                                </div>
+                                <x-button icon="o-x-mark" wire:click="quitarPrescripcion({{ $i }})"
+                                    class="btn-ghost btn-xs text-error" />
+                            </div>
+                        @endforeach
+                    </div>
+
                     <x-input label="Próxima cita recomendada" wire:model="proxima_cita_recomendada" type="date" icon="o-calendar" hint="Para revisión o control" />
                 </div>
             </div>
@@ -201,7 +246,22 @@
 
                     <div class="bg-base-100 p-4 rounded-xl border border-success/30 shadow-sm">
                         <h4 class="text-xs font-bold text-success uppercase tracking-wider mb-2"><x-icon name="o-beaker" class="w-4 h-4 inline" /> Tratamiento e Indicaciones</h4>
-                        <p class="text-sm whitespace-pre-wrap">{{ $historiaSeleccionada->tratamiento_indicaciones ?: 'Sin indicaciones.' }}</p>
+                        <p class="text-sm whitespace-pre-wrap mb-4">{{ $historiaSeleccionada->tratamiento_indicaciones ?: 'Sin indicaciones.' }}</p>
+                        
+                        @if($historiaSeleccionada->prescripciones->isNotEmpty())
+                            <div class="space-y-2 pt-2 border-t border-success/10">
+                                <p class="text-xs font-bold text-success/60 uppercase tracking-widest mb-2">Medicamentos recetados:</p>
+                                @foreach($historiaSeleccionada->prescripciones as $p)
+                                    <div class="flex items-center gap-2 text-sm bg-success/5 p-2 rounded-lg">
+                                        <x-icon name="o-chevron-right" class="w-3 h-3 text-success" />
+                                        <span class="font-bold">{{ $p->medicamento }}</span>
+                                        <span class="text-base-content/70">({{ $p->dosis }})</span>
+                                        @if($p->frecuencia) <span class="text-xs italic text-base-content/50"> - {{ $p->frecuencia }}</span> @endif
+                                        @if($p->duracion) <span class="text-xs italic text-base-content/50"> por {{ $p->duracion }}</span> @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     @if($historiaSeleccionada->proxima_cita_recomendada)

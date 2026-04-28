@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
         ->name('clientes')->middleware('can:clientes.ver');
     Route::get('/mascotas', \App\Livewire\Mascotas\Index::class)
         ->name('mascotas')->middleware('can:mascotas.ver');
+    Route::get('/mascotas/{mascota}/perfil', \App\Livewire\Mascotas\Perfil::class)
+        ->name('mascotas.perfil')->middleware('can:mascotas.ver');
     Route::get('/historias', \App\Livewire\Historias\Index::class)
         ->name('historias')->middleware('can:historias.ver');
     Route::get('/vacunas', \App\Livewire\Vacunas\Index::class)

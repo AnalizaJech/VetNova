@@ -18,15 +18,11 @@ class Venta extends Model
         'clinica_id',
         'cliente_id',
         'cajero_id',
-        'tipo_comprobante',
-        'serie_correlativo',
         'subtotal',
         'igv',
         'total',
         'metodo_pago',
         'estado',
-        'nubefact_enlace_pdf',
-        'nubefact_external_id',
         'notas',
     ];
 

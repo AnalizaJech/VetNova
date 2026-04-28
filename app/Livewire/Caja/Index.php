@@ -12,6 +12,7 @@ use App\Models\VentaDetalle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -40,12 +41,6 @@ class Index extends Component
     public string $metodo_pago = 'EFECTIVO';
     public string $notas = '';
 
-    public array $comprobantes = [
-        ['id' => 'TICKET', 'name' => 'Ticket de Venta (Uso Interno)'],
-        ['id' => 'BOLETA', 'name' => 'Boleta Electrónica'],
-        ['id' => 'FACTURA', 'name' => 'Factura Electrónica'],
-    ];
-
     public array $metodos_pago = [
         ['id' => 'EFECTIVO', 'name' => 'Efectivo'],
         ['id' => 'TARJETA', 'name' => 'Tarjeta (POS)'],
@@ -62,7 +57,7 @@ class Index extends Component
     public function buscarClientes(string $value = ''): void
     {
         $this->clientesSearch = Cliente::query()
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->where('activo', true)
             ->when($value, function (Builder $query) use ($value) {
                 $query->where(function ($q) use ($value) {
@@ -78,7 +73,7 @@ class Index extends Component
     public function buscarProductos(string $value = ''): void
     {
         $this->productosSearch = Producto::query()
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->where('activo', true)
             ->when($value, function (Builder $query) use ($value) {
                 $query->where(function ($q) use ($value) {
@@ -189,33 +184,24 @@ class Index extends Component
 
     public function cobrar()
     {
+        if (!$this->cliente_id) {
+            $this->error('Debe seleccionar un cliente para procesar la venta.');
+            return;
+        }
+
         if (empty($this->carrito)) {
             $this->warning('El carrito está vacío.');
             return;
         }
 
-        if ($this->tipo_comprobante === 'FACTURA' && !$this->cliente_id) {
-            $this->error('Para emitir una Factura es obligatorio seleccionar un Cliente con RUC.');
-            return;
-        }
-
-        if ($this->tipo_comprobante === 'FACTURA' && $this->cliente_id) {
-            $cliente = Cliente::find($this->cliente_id);
-            if ($cliente && $cliente->tipo_documento !== 'RUC') {
-                $this->error('El cliente seleccionado no tiene RUC. No puedes emitir Factura.');
-                return;
-            }
-        }
-
-        $clinica_id = auth()->user()->clinica_id;
+        $clinica_id = Auth::user()->clinica_id;
 
         $venta = DB::transaction(function () use ($clinica_id) {
             // 1. Crear cabecera de la venta
             $nuevaVenta = Venta::create([
                 'clinica_id' => $clinica_id,
                 'cliente_id' => $this->cliente_id,
-                'cajero_id' => auth()->id(),
-                'tipo_comprobante' => $this->tipo_comprobante,
+                'cajero_id' => Auth::id(),
                 'subtotal' => $this->subtotal,
                 'igv' => $this->igv,
                 'total' => $this->total,
@@ -248,7 +234,7 @@ class Index extends Component
                         KardexMovimiento::create([
                             'clinica_id' => $nuevaVenta->clinica_id,
                             'producto_id' => $producto->id,
-                            'usuario_id' => auth()->id(),
+                            'usuario_id' => Auth::id(),
                             'tipo' => 'SALIDA_VENTA',
                             'cantidad' => -$item['cantidad'],
                             'stock_anterior' => $stockAnterior,
@@ -264,22 +250,7 @@ class Index extends Component
             return $nuevaVenta;
         });
 
-        // 3. Integración con SUNAT / Nubefact
-        if (in_array($this->tipo_comprobante, ['BOLETA', 'FACTURA'])) {
-            $nubefact = new \App\Services\NubefactService();
-            $respuesta = $nubefact->emitir($venta);
-            
-            if ($respuesta['exito']) {
-                $this->success('Comprobante enviado a SUNAT con éxito.');
-            } else {
-                $errorMsg = is_array($respuesta['error']) ? json_encode($respuesta['error']) : $respuesta['error'];
-                $this->warning('Venta local guardada, pero falló Nubefact: ' . $errorMsg, timeout: 5000);
-            }
-        } else {
-            $this->success('¡Ticket local registrado con éxito!');
-        }
-
-        $this->limpiarCaja();
+        $this->success('¡Venta registrada con éxito!');
         
         // Redirigir a la vista del ticket
         return redirect()->route('ventas.ticket', $venta->id);

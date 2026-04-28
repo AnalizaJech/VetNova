@@ -4,7 +4,7 @@
         <h1 class="text-3xl font-bold font-heading text-base-content tracking-tight">
             ¡Hola, {{ auth()->user()->name }}! <x-icon name="o-sparkles" class="w-8 h-8 text-warning inline-block" />
         </h1>
-        <p class="text-base-content/60">Aquí tienes el resumen de tu clínica de hoy, {{ now()->translatedFormat('l d de F') }}.</p>
+        <p class="text-base-content/60">Hoy es {{ now()->translatedFormat('l j \d\e F') }}. Tienes <span class="font-bold text-primary">{{ $citasHoy }}</span> citas por atender.</p>
     </div>
 
     {{-- Tarjetas de Estadísticas (Stats) --}}
@@ -37,11 +37,18 @@
             title="Alertas de Inventario" 
             value="{{ $alertasStock }}" 
             icon="o-exclamation-triangle" 
-            class="shadow-sm border-l-4 border-error bg-base-100" 
-            color="text-error" 
-            description="Productos con stock bajo"
-        />
+            class="shadow-sm border-l-4 {{ $alertasStock > 0 ? 'bg-error/10 border-error' : 'bg-base-100 border-base-300' }}" 
+            color="{{ $alertasStock > 0 ? 'text-error' : 'text-base-content/40' }}" 
+            description="{{ $alertasStock > 0 ? 'Productos con stock bajo' : 'Stock saludable' }}"
+        >
+            @if($alertasStock > 0)
+                <x-slot:actions>
+                    <x-button label="Ver inventario" link="{{ route('inventario') }}" class="btn-xs btn-error btn-outline" icon="o-arrow-right" />
+                </x-slot:actions>
+            @endif
+        </x-stat>
     </div>
+
 
     {{-- Widgets a dos columnas --}}
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -70,8 +77,9 @@
                                     <p class="text-xs text-base-content/60">{{ $cita->motivo }}</p>
                                 </div>
                             </div>
-                            <div>
+                            <div class="flex items-center gap-2">
                                 <x-badge :value="$cita->estado" class="{{ $cita->estado === 'EN_PROGRESO' ? 'badge-warning' : 'badge-ghost' }} badge-sm" />
+                                <x-button icon="o-play" link="{{ route('citas') }}?id={{ $cita->id }}&action=atender" class="btn-xs btn-success" tooltip="Atender ahora" />
                             </div>
                         </div>
                     @endforeach
@@ -95,11 +103,6 @@
                     @foreach($ultimasVentas as $venta)
                         <div class="py-3 flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="avatar placeholder">
-                                    <div class="bg-base-200 text-base-content rounded-full w-10">
-                                        <x-icon name="o-banknotes" class="w-5 h-5 text-success" />
-                                    </div>
-                                </div>
                                 <div>
                                     <p class="font-semibold text-base-content">
                                         {{ $venta->cliente->nombres ?? 'Público General' }}
@@ -110,8 +113,17 @@
                                 </div>
                             </div>
                             <div class="text-right">
-                                <p class="font-bold text-success">S/ {{ number_format($venta->total, 2) }}</p>
-                                <p class="text-[10px] text-base-content/50 uppercase">{{ $venta->metodo_pago }}</p>
+                                <p class="font-bold text-success text-sm">S/ {{ number_format($venta->total, 2) }}</p>
+                                @php
+                                    $badgeColor = match($venta->metodo_pago) {
+                                        'EFECTIVO' => 'badge-neutral',
+                                        'TARJETA' => 'badge-info',
+                                        'YAPE_PLIN' => 'badge-success',
+                                        'TRANSFERENCIA' => 'badge-warning',
+                                        default => 'badge-ghost'
+                                    };
+                                @endphp
+                                <x-badge :value="$venta->metodo_pago" class="{{ $badgeColor }} badge-xs font-semibold" />
                             </div>
                         </div>
                     @endforeach

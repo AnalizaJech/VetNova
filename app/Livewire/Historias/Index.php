@@ -10,6 +10,7 @@ use App\Models\Mascota;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -25,6 +26,7 @@ class Index extends Component
     // Búsqueda
     #[\Livewire\Attributes\Url]
     public string $search = '';
+    public string $filtroFecha = '';
 
     // Modal Visor Completo
     public bool $modalVer = false;
@@ -50,12 +52,55 @@ class Index extends Component
     public string $tratamiento_indicaciones = '';
     public ?string $proxima_cita_recomendada = null;
 
+    // Prescripciones
+    public array $prescripciones = [];
+    public string $prescripcion_medicamento = '';
+    public string $prescripcion_dosis = '';
+    public string $prescripcion_frecuencia = '';
+    public string $prescripcion_duracion = '';
+
+    public function agregarPrescripcion(): void
+    {
+        $this->validate([
+            'prescripcion_medicamento' => 'required|string|max:100',
+            'prescripcion_dosis' => 'required|string|max:100',
+        ], [
+            'prescripcion_medicamento.required' => 'Indique el nombre del medicamento.',
+            'prescripcion_dosis.required' => 'Indique la dosis.',
+        ]);
+
+        $this->prescripciones[] = [
+            'medicamento' => $this->prescripcion_medicamento,
+            'dosis' => $this->prescripcion_dosis,
+            'frecuencia' => $this->prescripcion_frecuencia,
+            'duracion' => $this->prescripcion_duracion,
+        ];
+
+        $this->reset(['prescripcion_medicamento', 'prescripcion_dosis', 'prescripcion_frecuencia', 'prescripcion_duracion']);
+    }
+
+    public function quitarPrescripcion(int $index): void
+    {
+        unset($this->prescripciones[$index]);
+        $this->prescripciones = array_values($this->prescripciones);
+    }
+
     // Selectores asíncronos (Mary UI)
     public Collection|array $mascotasSearch = [];
 
     public function mount(): void
     {
+        // Detectar si viene desde la agenda de citas
+        $citaId   = request()->query('cita_id');
+        $mascotaId = request()->query('mascota_id');
+        $fromAgenda = request()->query('from') === 'agenda';
+
         $this->buscarMascotas('');
+
+        if ($citaId && $mascotaId && $fromAgenda) {
+            // Abrir directamente el modal de nueva consulta con contexto pre-cargado
+            $this->create((int)$citaId, (int)$mascotaId);
+        }
     }
 
     public function updatedSearch(): void
@@ -76,7 +121,7 @@ class Index extends Component
     {
         $this->mascotasSearch = Mascota::query()
             ->with('cliente')
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->where('fallecido', false)
             ->when($value, function (Builder $query) use ($value) {
                 $query->where('nombre', 'like', "%{$value}%")
@@ -135,6 +180,14 @@ class Index extends Component
         $this->tratamiento_indicaciones = $historia->tratamiento_indicaciones ?? '';
         $this->proxima_cita_recomendada = $historia->proxima_cita_recomendada?->format('Y-m-d');
 
+        // Cargar prescripciones existentes
+        $this->prescripciones = $historia->prescripciones->map(fn($p) => [
+            'medicamento' => $p->medicamento,
+            'dosis' => $p->dosis,
+            'frecuencia' => $p->frecuencia,
+            'duracion' => $p->duracion,
+        ])->toArray();
+
         $this->modalModal = true;
     }
 
@@ -157,13 +210,22 @@ class Index extends Component
             'mascota_id.required' => 'Debes seleccionar el paciente para esta consulta.',
         ]);
 
-        $clinica_id = auth()->user()->clinica_id;
+        $clinica_id = Auth::user()->clinica_id;
+
+        if (!$this->isEditing && $this->cita_id) {
+            $yaExiste = HistoriaClinica::where('cita_id', $this->cita_id)->exists();
+            if ($yaExiste) {
+                $this->error('Ya existe una historia clínica para esta cita. Edítala desde la tabla.');
+                return;
+            }
+        }
+
         $fechaHora = \Carbon\Carbon::parse("{$this->fecha} {$this->hora}");
 
         $data = [
             'clinica_id' => $clinica_id,
             'mascota_id' => $this->mascota_id,
-            'veterinario_id' => auth()->id(), // El veterinario que registra
+            'veterinario_id' => Auth::id(), // El veterinario que registra
             'cita_id' => $this->cita_id,
             'fecha' => $fechaHora,
             'motivo_consulta' => $this->motivo_consulta,
@@ -178,10 +240,12 @@ class Index extends Component
         ];
 
         if ($this->isEditing && $this->historia_id) {
-            HistoriaClinica::where('clinica_id', $clinica_id)->findOrFail($this->historia_id)->update($data);
+            $historiaActual = HistoriaClinica::where('clinica_id', $clinica_id)->findOrFail($this->historia_id);
+            $historiaActual->update($data);
+            $historiaActual->prescripciones()->delete();
             $this->success('Consulta actualizada correctamente.');
         } else {
-            HistoriaClinica::create($data);
+            $historiaActual = HistoriaClinica::create($data);
             
             // Si la consulta viene de una cita, completarla
             if ($this->cita_id) {
@@ -189,6 +253,19 @@ class Index extends Component
             }
             
             $this->success('Consulta registrada exitosamente.');
+        }
+
+        // Guardar Prescripciones
+        if ($historiaActual && !empty($this->prescripciones)) {
+            foreach ($this->prescripciones as $p) {
+                \App\Models\Prescripcion::create([
+                    'historia_clinica_id' => $historiaActual->id,
+                    'medicamento' => $p['medicamento'],
+                    'dosis' => $p['dosis'],
+                    'frecuencia' => $p['frecuencia'] ?? null,
+                    'duracion' => $p['duracion'] ?? null,
+                ]);
+            }
         }
 
         // AUTO-ACTUALIZACIÓN: Actualizar peso actual de la mascota
@@ -208,7 +285,8 @@ class Index extends Component
         $this->reset([
             'historia_id', 'mascota_id', 'cita_id', 'motivo_consulta', 'peso',
             'temperatura', 'frecuencia_cardiaca', 'frecuencia_respiratoria',
-            'anamnesis', 'diagnostico_presuntivo', 'tratamiento_indicaciones', 'proxima_cita_recomendada'
+            'anamnesis', 'diagnostico_presuntivo', 'tratamiento_indicaciones', 'proxima_cita_recomendada',
+            'prescripciones', 'prescripcion_medicamento', 'prescripcion_dosis', 'prescripcion_frecuencia', 'prescripcion_duracion'
         ]);
         $this->fecha = now()->format('Y-m-d');
         $this->hora = now()->format('H:i');
@@ -228,7 +306,8 @@ class Index extends Component
     public function getHistoriasProperty(): LengthAwarePaginator
     {
         return HistoriaClinica::with(['mascota.cliente', 'veterinario'])
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
+            ->when($this->filtroFecha, fn($q) => $q->whereDate('fecha', $this->filtroFecha))
             ->when($this->search, function (Builder $query) {
                 // Envolver en where() para proteger el scope de clinica_id
                 $query->where(function ($outer) {

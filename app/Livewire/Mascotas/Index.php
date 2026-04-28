@@ -9,6 +9,7 @@ use App\Models\Mascota;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -23,6 +24,8 @@ class Index extends Component
 
     // Búsqueda en tabla
     public string $search = '';
+    public string $filtroEspecie = '';
+    public string $filtroSexo = '';
 
     // Modal
     public bool $modalModal = false;
@@ -78,7 +81,7 @@ class Index extends Component
     public function buscarClientes(string $value = ''): void
     {
         $this->clientesSearch = Cliente::query()
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
             ->where('activo', true)
             ->when($value, function (Builder $query) use ($value) {
                 $query->where(function ($q) use ($value) {
@@ -145,7 +148,7 @@ class Index extends Component
             'fecha_nacimiento.before_or_equal' => 'La fecha de nacimiento no puede ser futura.',
         ]);
 
-        $clinica_id = auth()->user()->clinica_id;
+        $clinica_id = Auth::user()->clinica_id;
 
         $data = [
             'clinica_id' => $clinica_id,
@@ -174,19 +177,21 @@ class Index extends Component
         $this->resetForm();
     }
 
-    public function delete(int $id): void
+    public function marcarFallecido(int $id): void
     {
-        $mascota = Mascota::where('clinica_id', auth()->user()->clinica_id)->findOrFail($id);
-        $mascota->delete();
-        $this->warning('Mascota eliminada del sistema.');
+        $mascota = Mascota::where('clinica_id', Auth::user()->clinica_id)->findOrFail($id);
+        $mascota->update(['fallecido' => true]);
+        $this->warning("Se marcó a {$mascota->nombre} como fallecido. El historial médico se conserva.");
     }
 
     private function resetForm(): void
     {
         $this->reset([
-            'mascota_id', 'cliente_id', 'nombre', 'raza', 'color', 
+            'mascota_id', 'cliente_id', 'nombre', 
             'fecha_nacimiento', 'peso_actual', 'notas_medicas'
         ]);
+        $this->raza = '';
+        $this->color = '';
         $this->especie = 'Perro';
         $this->sexo = 'M';
         $this->esterilizado = false;
@@ -207,7 +212,9 @@ class Index extends Component
     public function getMascotasProperty(): LengthAwarePaginator
     {
         return Mascota::with('cliente')
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', Auth::user()->clinica_id)
+            ->when($this->filtroEspecie, fn($q) => $q->where('especie', $this->filtroEspecie))
+            ->when($this->filtroSexo, fn($q) => $q->where('sexo', $this->filtroSexo))
             ->when($this->search, function (Builder $query) {
                 // Envolver en where() para no romper el scope de clinica_id con orWhereHas
                 $query->where(function ($outer) {
