@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -52,6 +53,72 @@ class Index extends Component
         $this->cargarRoles();
     }
 
+    public function buscarDocumento(): void
+    {
+        // Forzar limpieza y validación
+        $documento = preg_replace('/[^0-9]/', '', (string)$this->dni);
+        $this->dni = $documento;
+
+        if (strlen($documento) === 8) {
+            $this->buscarDni();
+        } elseif (strlen($documento) === 11) {
+            $this->buscarRuc();
+        } else {
+            $this->warning('El documento debe tener 8 o 11 dígitos para consultar.');
+        }
+    }
+
+    public function buscarDni(): void
+    {
+        if (empty($this->dni)) return;
+
+        $service = app(\App\Services\PeruApiService::class);
+        $res = $service->consultarDni($this->dni);
+
+        // Usamos la misma lógica que el módulo de Clientes que ya funciona
+        if ($res) {
+            if (isset($res['nombres'])) {
+                // Formato Plano (RENIEC estándar)
+                $nombres = $res['nombres'] ?? '';
+                $apellidos = trim(($res['apellido_paterno'] ?? '') . ' ' . ($res['apellido_materno'] ?? ''));
+                $this->name = mb_convert_case("{$nombres} {$apellidos}", MB_CASE_TITLE, 'UTF-8');
+                $this->success('Datos obtenidos de RENIEC.');
+            } elseif (isset($res['data']['nombre_completo'])) {
+                // Formato Anidado
+                $this->name = mb_convert_case($res['data']['nombre_completo'], MB_CASE_TITLE, 'UTF-8');
+                $this->success('Datos obtenidos correctamente.');
+            } else {
+                $this->warning('DNI no encontrado o error de formato.');
+            }
+        } else {
+            $this->warning('No se pudo conectar con el servicio de identidad.');
+        }
+    }
+
+    public function buscarRuc(): void
+    {
+        if (empty($this->dni)) return;
+
+        $service = app(\App\Services\PeruApiService::class);
+        $res = $service->consultarRuc($this->dni);
+
+        if ($res) {
+            if (isset($res['razon_social'])) {
+                // Formato Plano (SUNAT estándar)
+                $this->name = mb_convert_case($res['razon_social'], MB_CASE_TITLE, 'UTF-8');
+                $this->success('Datos obtenidos de SUNAT.');
+            } elseif (isset($res['data']['nombre_o_razon_social'])) {
+                // Formato Anidado
+                $this->name = mb_convert_case($res['data']['nombre_o_razon_social'], MB_CASE_TITLE, 'UTF-8');
+                $this->success('Datos obtenidos correctamente.');
+            } else {
+                $this->warning('RUC no encontrado o es inválido.');
+            }
+        } else {
+            $this->warning('No se pudo conectar con el servicio de SUNAT.');
+        }
+    }
+
     public function updatedSearch(): void
     {
         $this->resetPage();
@@ -66,7 +133,10 @@ class Index extends Component
         $query = Role::query();
 
         // Solo super_admin puede ver/asignar el rol super_admin
-        if (!auth()->user()->hasRole('super_admin')) {
+        /** @var User $authUser */
+        $authUser = Auth::user();
+
+        if (!$authUser->hasRole('super_admin')) {
             $query->where('name', '!=', 'super_admin');
         }
 
@@ -92,8 +162,11 @@ class Index extends Component
 
     public function edit(User $user): void
     {
+        /** @var User $authUser */
+        $authUser = Auth::user();
+
         // Verificar que el usuario pertenece a la misma clínica
-        if ($user->clinica_id !== auth()->user()->clinica_id) {
+        if ($user->clinica_id !== $authUser->clinica_id) {
             $this->error('No puedes editar usuarios de otra clínica.');
             return;
         }
@@ -135,7 +208,9 @@ class Index extends Component
             'rol.required' => 'Debes asignar un rol al usuario.',
         ]);
 
-        $clinica_id = auth()->user()->clinica_id;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $clinica_id = $authUser->clinica_id;
 
         // Validar email único dentro de la clínica
         $existe = User::where('clinica_id', $clinica_id)
@@ -150,7 +225,7 @@ class Index extends Component
 
         $data = [
             'clinica_id' => $clinica_id,
-            'sucursal_id' => auth()->user()->sucursal_id, // Misma sucursal por defecto
+            'sucursal_id' => $authUser->sucursal_id, // Misma sucursal por defecto
             'name' => $this->name,
             'email' => $this->email,
             'telefono' => $this->telefono ?: null,
@@ -188,10 +263,13 @@ class Index extends Component
      */
     public function toggleActivo(int $id): void
     {
-        $user = User::where('clinica_id', auth()->user()->clinica_id)->findOrFail($id);
+        /** @var User $authUser */
+        $authUser = Auth::user();
+
+        $user = User::where('clinica_id', $authUser->clinica_id)->findOrFail($id);
 
         // No permitir desactivarse a sí mismo
-        if ($user->id === auth()->id()) {
+        if ($user->id === $authUser->id) {
             $this->error('No puedes desactivar tu propia cuenta.');
             return;
         }
@@ -224,8 +302,11 @@ class Index extends Component
 
     public function getUsersProperty(): LengthAwarePaginator
     {
+        /** @var User $authUser */
+        $authUser = Auth::user();
+
         return User::with('roles')
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', $authUser->clinica_id)
             ->when($this->search, function (Builder $query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', "%{$this->search}%")

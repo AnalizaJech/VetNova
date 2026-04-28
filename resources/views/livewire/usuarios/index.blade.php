@@ -102,7 +102,24 @@
             <x-input label="Teléfono" wire:model="telefono" icon="o-phone" placeholder="987654321" error-field="telefono" />
 
             {{-- DNI --}}
-            <x-input label="DNI" wire:model="dni" icon="o-identification" placeholder="12345678" maxlength="15" error-field="dni" />
+            <x-input 
+                label="DNI / RUC" 
+                wire:model.live="dni" 
+                icon="o-identification" 
+                placeholder="Ingresar DNI o RUC" 
+                maxlength="11" 
+                error-field="dni"
+            >
+                <x-slot:append>
+                    <x-button 
+                        icon="o-magnifying-glass" 
+                        class="btn-primary rounded-l-none" 
+                        wire:click="buscarDocumento" 
+                        spinner="buscarDocumento"
+                        tooltip="Buscar en RENIEC/SUNAT"
+                    />
+                </x-slot:append>
+            </x-input>
 
             {{-- Contraseña --}}
             <x-input label="{{ $isEditing ? 'Nueva contraseña (dejar vacío para no cambiar)' : 'Contraseña' }}" wire:model="password" type="password" icon="o-key" placeholder="Mínimo 8 caracteres" error-field="password" />

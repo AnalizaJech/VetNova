@@ -1,18 +1,11 @@
 <?php
-require 'vendor/autoload.php';
-$app = require_once 'bootstrap/app.php';
+require dirname(__DIR__).'/vendor/autoload.php';
+$app = require_once dirname(__DIR__).'/bootstrap/app.php';
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 $kernel->bootstrap();
 
-use App\Services\PeruApiService;
-
-$service = new PeruApiService();
-$dni = '70617300';
-echo "Consultando DNI: $dni\n";
-$result = $service->consultarDni($dni);
-
-if ($result) {
-    echo "Resultado: " . json_encode($result, JSON_PRETTY_PRINT) . "\n";
-} else {
-    echo "Error: No se obtuvieron datos.\n";
-}
+$service = app(App\Services\PeruApiService::class);
+$dni = '21311331'; // DNI from the screenshot
+$res = $service->consultarDni($dni);
+echo "Response for DNI $dni:\n";
+print_r($res);
