@@ -176,103 +176,139 @@
 
     {{-- Modal Visor Completo --}}
     {{-- Modal Visor Completo --}}
+    {{-- Contenedor Invisible para Impresión con Iframe --}}
+    <div id="print-container" class="hidden"></div>
+
+    @script
+    <script>
+        window.imprimirFichaClinica = function() {
+            const printContent = document.getElementById('historia-detalle-imprimir').innerHTML;
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            const doc = iframe.contentWindow.document;
+            doc.write('<html><head><title>VetNova - Historia Clínica</title>');
+            doc.write('<style>');
+            doc.write('@@page { margin: 1.5cm; size: A4; }');
+            doc.write('body { font-family: sans-serif; color: #000; background: #fff; line-height: 1.3; font-size: 10pt; }');
+            doc.write('.header { border-bottom: 3px solid #000; margin-bottom: 20px; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-end; }');
+            doc.write('.header h1 { margin: 0; font-size: 22pt; font-weight: 900; text-transform: uppercase; }');
+            doc.write('.section { border: 1px solid #000; padding: 12px; margin-bottom: 15px; }');
+            doc.write('.section-title { font-weight: bold; text-transform: uppercase; font-size: 9pt; border-bottom: 1px solid #000; margin-bottom: 8px; }');
+            doc.write('.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }');
+            doc.write('.triage-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #ccc; }');
+            doc.write('.font-bold { font-weight: bold; }');
+            doc.write('.whitespace-pre { white-space: pre-wrap; }');
+            doc.write('svg, button, .no-print { display: none !important; }');
+            doc.write('</style></head><body>');
+            
+            doc.write('<div class="header"><div><h1>VetNova</h1><div style="font-size:14pt;font-weight:bold;">HISTORIA CLÍNICA OFICIAL</div></div><div style="font-size:8pt;text-align:right;"><b>Fecha:</b> ' + new Date().toLocaleString() + '</div></div>');
+            doc.write(printContent);
+            doc.write('</body></html>');
+            doc.close();
+
+            setTimeout(() => {
+                iframe.contentWindow.print();
+                document.body.removeChild(iframe);
+            }, 500);
+        }
+    </script>
+    @endscript
+
+    {{-- Modal Visor Completo --}}
     <x-modal wire:model="modalVer" title="Expediente Clínico" subtitle="{{ $historiaSeleccionada?->fecha->format('d/m/Y h:i A') }}" separator class="backdrop-blur-sm" box-class="max-w-4xl">
         @if($historiaSeleccionada)
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                {{-- Columna Info Paciente y Constantes --}}
-                <div class="col-span-1 space-y-4">
-                    {{-- Paciente --}}
-                    <div class="bg-base-200/50 p-4 rounded-xl border border-base-200">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="bg-primary/10 p-2 rounded-lg">
-                                <x-icon name="o-heart" class="w-6 h-6 text-primary" />
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-lg leading-none">{{ $historiaSeleccionada->mascota->nombre }}</h3>
-                                <p class="text-xs text-base-content/60">{{ $historiaSeleccionada->mascota->especie }} &bull; {{ $historiaSeleccionada->mascota->sexo === 'M' ? 'Macho' : 'Hembra' }}</p>
-                            </div>
-                        </div>
-                        <div class="text-xs mt-3 text-base-content/70">
-                            <strong>Propietario:</strong> {{ $historiaSeleccionada->mascota->cliente->nombre_completo ?? 'N/A' }}
-                        </div>
-                        <div class="text-xs mt-1 text-base-content/70">
-                            <strong>Veterinario:</strong> {{ $historiaSeleccionada->veterinario->name ?? 'N/A' }}
-                        </div>
-                    </div>
-
-                    {{-- Triage --}}
-                    <div class="bg-base-200/50 p-4 rounded-xl border border-base-200">
-                        <h4 class="font-bold text-sm mb-3 border-b border-base-300 pb-2">Constantes (Triage)</h4>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between border-b border-base-300/30 pb-1">
-                                <span class="text-base-content/60">Peso:</span>
-                                <span class="font-semibold">{{ $historiaSeleccionada->peso ? $historiaSeleccionada->peso . ' kg' : 'N/A' }}</span>
-                            </div>
-                            <div class="flex justify-between border-b border-base-300/30 pb-1">
-                                <span class="text-base-content/60">Temp:</span>
-                                <span class="font-semibold">{{ $historiaSeleccionada->temperatura ? $historiaSeleccionada->temperatura . ' °C' : 'N/A' }}</span>
-                            </div>
-                            <div class="flex justify-between border-b border-base-300/30 pb-1">
-                                <span class="text-base-content/60">F. Cardíaca:</span>
-                                <span class="font-semibold">{{ $historiaSeleccionada->frecuencia_cardiaca ? $historiaSeleccionada->frecuencia_cardiaca . ' lpm' : 'N/A' }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60">F. Resp:</span>
-                                <span class="font-semibold">{{ $historiaSeleccionada->frecuencia_respiratoria ? $historiaSeleccionada->frecuencia_respiratoria . ' rpm' : 'N/A' }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Columna Detalles Médicos --}}
-                <div class="col-span-1 md:col-span-2 space-y-4">
+            <div id="historia-detalle-imprimir">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
-                    <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm">
-                        <h4 class="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-1">Motivo de Consulta</h4>
-                        <p class="text-base font-semibold text-primary">{{ $historiaSeleccionada->motivo_consulta }}</p>
-                    </div>
-
-                    <div class="bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm">
-                        <h4 class="text-xs font-bold text-base-content/50 uppercase tracking-wider mb-2">Anamnesis y Examen Físico</h4>
-                        <p class="text-sm whitespace-pre-wrap text-base-content/80">{{ $historiaSeleccionada->anamnesis ?: 'No se registraron detalles adicionales.' }}</p>
-                    </div>
-
-                    <div class="bg-base-100 p-4 rounded-xl border border-warning/30 shadow-sm">
-                        <h4 class="text-xs font-bold text-warning uppercase tracking-wider mb-2">Diagnóstico Presuntivo</h4>
-                        <p class="text-sm whitespace-pre-wrap font-medium">{{ $historiaSeleccionada->diagnostico_presuntivo ?: 'Sin diagnóstico registrado.' }}</p>
-                    </div>
-
-                    <div class="bg-base-100 p-4 rounded-xl border border-success/30 shadow-sm">
-                        <h4 class="text-xs font-bold text-success uppercase tracking-wider mb-2">Tratamiento e Indicaciones</h4>
-                        <p class="text-sm whitespace-pre-wrap mb-4">{{ $historiaSeleccionada->tratamiento_indicaciones ?: 'Sin indicaciones.' }}</p>
-                        
-                        @if($historiaSeleccionada->prescripciones->isNotEmpty())
-                            <div class="space-y-2 pt-2 border-t border-success/10">
-                                @foreach($historiaSeleccionada->prescripciones as $p)
-                                    <div class="text-sm bg-success/5 p-2 rounded-lg border border-success/10">
-                                        <span class="font-bold text-success">{{ $p->medicamento }}</span>
-                                        <span class="text-base-content/70">({{ $p->dosis }})</span>
-                                        @if($p->frecuencia) <span class="text-xs italic text-base-content/50"> - {{ $p->frecuencia }}</span> @endif
-                                    </div>
-                                @endforeach
+                    {{-- Columna Info Paciente y Constantes --}}
+                    <div class="col-span-1 space-y-4">
+                        {{-- Paciente --}}
+                        <div class="section bg-base-200/50 p-4 rounded-xl border border-base-200">
+                            <div class="section-title hidden print:block">Datos del Paciente</div>
+                            <div class="flex items-center gap-3 mb-2 no-print">
+                                <div class="bg-primary/10 p-2 rounded-lg">
+                                    <x-icon name="o-heart" class="w-6 h-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg leading-none">{{ $historiaSeleccionada->mascota->nombre }}</h3>
+                                    <p class="text-xs text-base-content/60">{{ $historiaSeleccionada->mascota->especie }}</p>
+                                </div>
                             </div>
-                        @endif
+                            <div class="space-y-1">
+                                <div class="text-sm print:text-base"><span class="font-bold">Mascota:</span> {{ $historiaSeleccionada->mascota->nombre }} ({{ $historiaSeleccionada->mascota->especie }})</div>
+                                <div class="text-sm print:text-base"><span class="font-bold">Propietario:</span> {{ $historiaSeleccionada->mascota->cliente->nombre_completo ?? 'N/A' }}</div>
+                                <div class="text-sm print:text-base"><span class="font-bold">Veterinario:</span> {{ $historiaSeleccionada->veterinario->name ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+
+                        {{-- Triage --}}
+                        <div class="section bg-base-200/50 p-4 rounded-xl border border-base-200">
+                            <div class="section-title">Constantes Vitales (Triage)</div>
+                            <div class="space-y-1 text-sm">
+                                <div class="triage-row flex justify-between">
+                                    <span>Peso:</span>
+                                    <span class="font-bold">{{ $historiaSeleccionada->peso ? $historiaSeleccionada->peso . ' kg' : 'N/A' }}</span>
+                                </div>
+                                <div class="triage-row flex justify-between">
+                                    <span>Temperatura:</span>
+                                    <span class="font-bold">{{ $historiaSeleccionada->temperatura ? $historiaSeleccionada->temperatura . ' °C' : 'N/A' }}</span>
+                                </div>
+                                <div class="triage-row flex justify-between">
+                                    <span>F. Cardíaca:</span>
+                                    <span class="font-bold">{{ $historiaSeleccionada->frecuencia_cardiaca ? $historiaSeleccionada->frecuencia_cardiaca . ' lpm' : 'N/A' }}</span>
+                                </div>
+                                <div class="triage-row flex justify-between">
+                                    <span>F. Respiratoria:</span>
+                                    <span class="font-bold">{{ $historiaSeleccionada->frecuencia_respiratoria ? $historiaSeleccionada->frecuencia_respiratoria . ' rpm' : 'N/A' }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    @if($historiaSeleccionada->proxima_cita_recomendada)
-                        <div class="bg-info/10 text-info p-3 rounded-xl border border-info/20 text-sm flex items-center gap-2">
-                            <x-icon name="o-calendar" class="w-5 h-5" />
-                            <strong>Próxima cita recomendada:</strong> {{ $historiaSeleccionada->proxima_cita_recomendada->format('d/m/Y') }}
+                    {{-- Columna Detalles Médicos --}}
+                    <div class="col-span-1 md:col-span-2 space-y-4">
+                        
+                        <div class="section bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm">
+                            <div class="section-title">Motivo de Consulta</div>
+                            <p class="text-base font-bold text-primary print:text-black">{{ $historiaSeleccionada->motivo_consulta }}</p>
                         </div>
-                    @endif
 
+                        <div class="section bg-base-100 p-4 rounded-xl border border-base-200 shadow-sm">
+                            <div class="section-title">Anamnesis y Examen Físico</div>
+                            <p class="whitespace-pre text-sm text-base-content/80 print:text-black">{{ $historiaSeleccionada->anamnesis ?: 'No registrado.' }}</p>
+                        </div>
+
+                        <div class="section bg-base-100 p-4 rounded-xl border border-warning/30 shadow-sm">
+                            <div class="section-title">Diagnóstico Presuntivo</div>
+                            <p class="whitespace-pre text-sm font-bold">{{ $historiaSeleccionada->diagnostico_presuntivo ?: 'Sin diagnóstico.' }}</p>
+                        </div>
+
+                        <div class="section bg-base-100 p-4 rounded-xl border border-success/30 shadow-sm">
+                            <div class="section-title">Tratamiento e Indicaciones</div>
+                            <p class="whitespace-pre text-sm mb-2">{{ $historiaSeleccionada->tratamiento_indicaciones ?: 'Sin indicaciones.' }}</p>
+                            
+                            @if($historiaSeleccionada->prescripciones->isNotEmpty())
+                                <div class="mt-2 pt-2 border-t border-black/10">
+                                    <div class="font-bold text-xs uppercase mb-1">Medicamentos:</div>
+                                    @foreach($historiaSeleccionada->prescripciones as $p)
+                                        <div class="text-sm">
+                                            • <span class="font-bold">{{ $p->medicamento }}</span> 
+                                            <span class="opacity-70">({{ $p->dosis }})</span>
+                                            @if($p->frecuencia) <span class="italic text-xs"> - {{ $p->frecuencia }}</span> @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             </div>
         @endif
 
         <x-slot:actions>
-            <x-button label="Imprimir" icon="o-printer" class="btn-primary" onclick="window.print()" />
+            <x-button label="Imprimir" icon="o-printer" class="btn-primary" onclick="imprimirFichaClinica()" />
             <x-button label="Cerrar" @click="$wire.modalVer = false" class="btn-neutral" />
         </x-slot:actions>
     </x-modal>
