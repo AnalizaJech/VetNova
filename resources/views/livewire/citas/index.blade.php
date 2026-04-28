@@ -94,7 +94,7 @@
                     };
                 @endphp
                 @if($cita->historia_clinica_count > 0)
-                    <x-badge icon="o-check-circle" value="Historia OK" class="badge-success badge-sm font-bold ml-1" />
+                    <x-badge icon="o-check-circle" value="COMPLETADA" class="badge-success badge-sm font-bold" />
                 @else
                     <x-badge :value="$cita->estado" class="{{ $color }} badge-sm font-semibold" />
                 @endif

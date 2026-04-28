@@ -7,6 +7,7 @@ namespace App\Livewire\Inventario;
 use App\Models\KardexMovimiento;
 use App\Models\Producto;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -44,6 +45,11 @@ class Index extends Component
     public int $stock_minimo = 0;
     public bool $activo = true;
     public string $notas = '';
+
+    // Trazabilidad inicial/ajuste
+    public string $lote = '';
+    public ?string $fecha_vencimiento = null;
+    public string $documento_referencia = '';
 
     public array $tipos = [
         ['id' => 'PRODUCTO', 'name' => 'Producto Físico'],
@@ -117,7 +123,9 @@ class Index extends Component
             'precio_venta.required' => 'El precio de venta es obligatorio.',
         ]);
 
-        $clinica_id = auth()->user()->clinica_id;
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $clinica_id = $authUser->clinica_id;
 
         $data = [
             'clinica_id' => $clinica_id,
@@ -175,12 +183,16 @@ class Index extends Component
             KardexMovimiento::create([
                 'clinica_id' => $clinica_id,
                 'producto_id' => $producto_id_final,
-                'usuario_id' => auth()->id(),
+                'usuario_id' => Auth::id(),
                 'tipo' => $tipo_movimiento,
                 'cantidad' => $diferencia_stock,
+                'costo_unitario' => $this->costo_compra,
+                'lote' => $this->lote ?: null,
+                'fecha_vencimiento' => $this->fecha_vencimiento ?: null,
+                'documento_referencia' => $this->documento_referencia ?: null,
                 'stock_anterior' => $stock_anterior,
                 'stock_posterior' => $stock_anterior + $diferencia_stock,
-                'notas' => $this->isEditing ? 'Ajuste manual de stock' : 'Inventario inicial',
+                'notas' => $this->isEditing ? ($this->notas ?: 'Ajuste manual de stock') : 'Inventario inicial',
             ]);
         }
 
@@ -190,14 +202,19 @@ class Index extends Component
 
     public function delete(int $id): void
     {
-        $producto = Producto::where('clinica_id', auth()->user()->clinica_id)->findOrFail($id);
+        /** @var User $authUser */
+        $authUser = Auth::user();
+        $producto = Producto::where('clinica_id', $authUser->clinica_id)->findOrFail($id);
         $producto->delete();
         $this->warning('Eliminado del catálogo.');
     }
 
     public function verKardex(int $id): void
     {
-        $this->kardexProducto = Producto::where('clinica_id', auth()->user()->clinica_id)
+        /** @var User $authUser */
+        $authUser = Auth::user();
+
+        $this->kardexProducto = Producto::where('clinica_id', $authUser->clinica_id)
             ->where('tipo', 'PRODUCTO')
             ->findOrFail($id);
             
@@ -208,7 +225,8 @@ class Index extends Component
     {
         $this->reset([
             'producto_id', 'categoria', 'nombre', 'codigo_barras', 
-            'precio_venta', 'costo_compra', 'notas'
+            'precio_venta', 'costo_compra', 'notas',
+            'lote', 'fecha_vencimiento', 'documento_referencia'
         ]);
         $this->tipo = 'PRODUCTO';
         $this->stock_actual = 0;
@@ -230,8 +248,11 @@ class Index extends Component
 
     public function getProductosProperty(): LengthAwarePaginator
     {
+        /** @var User $authUser */
+        $authUser = Auth::user();
+
         return Producto::query()
-            ->where('clinica_id', auth()->user()->clinica_id)
+            ->where('clinica_id', $authUser->clinica_id)
             ->when($this->filtroTipo, function (Builder $query) {
                 $query->where('tipo', $this->filtroTipo);
             })

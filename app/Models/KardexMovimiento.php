@@ -22,6 +22,10 @@ class KardexMovimiento extends Model
         'usuario_id',
         'tipo',
         'cantidad',
+        'costo_unitario',
+        'lote',
+        'fecha_vencimiento',
+        'documento_referencia',
         'stock_anterior',
         'stock_posterior',
         'referencia_tipo',
@@ -33,6 +37,8 @@ class KardexMovimiento extends Model
     {
         return [
             'cantidad' => 'integer',
+            'costo_unitario' => 'decimal:2',
+            'fecha_vencimiento' => 'date',
             'stock_anterior' => 'integer',
             'stock_posterior' => 'integer',
         ];

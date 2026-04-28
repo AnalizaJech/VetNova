@@ -134,12 +134,34 @@
 
             @if($tipo === 'PRODUCTO')
                 <h3 class="text-sm font-semibold text-base-content/70 mb-3">Control de Inventario</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="mb-4">
                     <x-input label="Código de Barras / SKU" wire:model="codigo_barras" placeholder="Ej. 775123..." />
-                    <x-input label="Stock Actual" wire:model="stock_actual" type="number" required />
-                    <x-input label="Stock Mínimo (Alerta)" wire:model="stock_minimo" type="number" required />
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <x-input label="Stock Actual" wire:model="stock_actual" type="number" icon="o-cube" />
+                    <x-input label="Stock Mínimo (Alerta)" wire:model="stock_minimo" type="number" icon="o-bell-alert" />
+                </div>
+
+                {{-- ── SECCIÓN DE TRAZABILIDAD (NUEVO) ── --}}
+                <div class="bg-base-200/50 p-4 rounded-xl space-y-4 border border-base-300 mt-4">
+                    <div class="flex items-center gap-2 mb-2 text-sm font-bold text-primary">
+                        <x-icon name="o-finger-print" class="w-4 h-4" />
+                        Trazabilidad y Referencia (Opcional)
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <x-input label="Lote" wire:model="lote" placeholder="EJ: LOT-2024" icon="o-hashtag" />
+                        <x-datepicker label="Vencimiento" wire:model="fecha_vencimiento" icon="o-calendar" :config="['altFormat' => 'd/m/Y']" />
+                        <x-input label="Ref. Documento" wire:model="documento_referencia" placeholder="Factura/Guía" icon="o-document-text" />
+                    </div>
+                    <p class="text-[10px] text-base-content/50 italic">
+                        * Estos datos se registrarán en el movimiento de Kardex generado por este cambio de stock.
+                    </p>
                 </div>
             @endif
+
+            <div class="mt-4">
+                <x-textarea label="Notas / Descripción" wire:model="notas" placeholder="Información adicional del producto o servicio..." rows="3" />
+            </div>
 
             <x-hr />
 
@@ -171,9 +193,10 @@
                     <tr>
                         <th>Fecha</th>
                         <th>Tipo</th>
-                        <th>Usuario</th>
+                        <th>Lote/Venc.</th>
                         <th>Cant.</th>
-                        <th>Stock Resultante</th>
+                        <th>Costo Unit.</th>
+                        <th>Stock Res.</th>
                         <th>Ref.</th>
                     </tr>
                 </thead>
@@ -184,13 +207,29 @@
                             <td>
                                 <x-badge value="{{ $mov->tipo_badge['label'] }}" class="{{ $mov->tipo_badge['class'] }} badge-sm" />
                             </td>
-                            <td>{{ $mov->usuario->name ?? 'Sistema' }}</td>
+                            <td class="text-xs">
+                                @if($mov->lote)
+                                    <div class="font-bold">Lote: {{ $mov->lote }}</div>
+                                @endif
+                                @if($mov->fecha_vencimiento)
+                                    <div class="{{ $mov->fecha_vencimiento->isPast() ? 'text-error' : 'text-base-content/70' }}">
+                                        Vence: {{ $mov->fecha_vencimiento->format('d/m/Y') }}
+                                    </div>
+                                @endif
+                                @if(!$mov->lote && !$mov->fecha_vencimiento)
+                                    -
+                                @endif
+                            </td>
                             <td class="font-bold {{ $mov->cantidad > 0 ? 'text-success' : 'text-error' }}">
                                 {{ $mov->cantidad > 0 ? '+' : '' }}{{ $mov->cantidad }}
                             </td>
+                            <td class="font-mono">
+                                {{ $mov->costo_unitario ? 'S/ '.number_format((float)$mov->costo_unitario, 2) : '-' }}
+                            </td>
                             <td class="font-mono">{{ $mov->stock_posterior }}</td>
-                            <td class="text-xs text-base-content/60 max-w-[150px] truncate" title="{{ $mov->notas }}">
-                                {{ $mov->notas ?? '-' }}
+                            <td class="text-xs text-base-content/60">
+                                <div class="font-bold">{{ $mov->documento_referencia }}</div>
+                                <div class="truncate max-w-[100px]" title="{{ $mov->notas }}">{{ $mov->notas }}</div>
                             </td>
                         </tr>
                     @empty
