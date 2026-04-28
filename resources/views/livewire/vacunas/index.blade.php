@@ -129,10 +129,10 @@
                 <div class="flex flex-col">
                     <x-input label="Próxima Dosis (Recordatorio)" wire:model="fecha_proxima" type="date" icon="o-bell" />
                     {{-- Botones rápidos de cálculo de fecha --}}
-                    <div class="flex gap-2 mt-2">
-                        <button type="button" wire:click="setProximaFecha(1)" class="btn btn-xs btn-outline btn-neutral">En 1 mes</button>
-                        <button type="button" wire:click="setProximaFecha(3)" class="btn btn-xs btn-outline btn-neutral">En 3 meses</button>
-                        <button type="button" wire:click="setProximaFecha(12)" class="btn btn-xs btn-outline btn-neutral">En 1 año</button>
+                    <div class="flex flex-wrap gap-2 mt-2">
+                        <button type="button" wire:click="setProximaFecha(1)" class="btn btn-sm btn-info btn-outline hover:text-white">En 1 mes</button>
+                        <button type="button" wire:click="setProximaFecha(3)" class="btn btn-sm btn-info btn-outline hover:text-white">En 3 meses</button>
+                        <button type="button" wire:click="setProximaFecha(12)" class="btn btn-sm btn-info btn-outline hover:text-white">En 1 año</button>
                     </div>
                 </div>
             </div>

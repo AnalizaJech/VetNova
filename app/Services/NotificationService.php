@@ -14,8 +14,8 @@ class NotificationService
 
     public function __construct()
     {
-        $sid   = env('TWILIO_SID');
-        $token = env('TWILIO_TOKEN');
+        $sid   = config('services.twilio.sid');
+        $token = config('services.twilio.token');
         
         if ($sid && $token) {
             $this->twilio = new TwilioClient($sid, $token);
@@ -30,11 +30,11 @@ class NotificationService
         if (!$this->twilio) return false;
 
         try {
-            $from = env('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886');
+            $from = config('services.twilio.whatsapp_from', 'whatsapp:+14155238886');
             // Asegurar formato whatsapp:+
             $formattedTo = str_starts_with($to, 'whatsapp:') ? $to : "whatsapp:$to";
             if (!str_contains($formattedTo, '+')) {
-                // Asumir Perú si no tiene prefijo (ajustar según necesidad)
+                // Asumir Perú si no tiene prefijo
                 $formattedTo = str_replace('whatsapp:', 'whatsapp:+51', $formattedTo);
             }
 
@@ -58,13 +58,13 @@ class NotificationService
         if (!$this->twilio) return false;
 
         try {
-            $messagingServiceSid = env('TWILIO_MESSAGING_SERVICE_SID');
+            $messagingServiceSid = config('services.twilio.messaging_service_sid');
             $payload = ['body' => $body];
 
             if ($messagingServiceSid) {
                 $payload['messagingServiceSid'] = $messagingServiceSid;
             } else {
-                $payload['from'] = env('TWILIO_FROM');
+                $payload['from'] = config('services.twilio.from');
             }
 
             $formattedTo = $to;

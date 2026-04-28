@@ -143,6 +143,12 @@ class Index extends Component
         if ($cita_id && $mascota_id) {
             $this->cita_id = $cita_id;
             $this->mascota_id = $mascota_id;
+            
+            $cita = Cita::find($cita_id);
+            if ($cita) {
+                $this->motivo_consulta = $cita->motivo;
+            }
+
             $mascota = Mascota::find($mascota_id);
             if ($mascota) {
                 $this->mascotasSearch = collect([$mascota]);

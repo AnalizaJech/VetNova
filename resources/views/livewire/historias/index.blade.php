@@ -111,15 +111,15 @@
                         <div class="grid grid-cols-2 gap-3">
                             <x-input label="Peso (kg)" wire:model="peso" type="number" step="0.01" icon="o-scale" hint="Actualizará el perfil" />
                             <x-input label="Temperatura (°C)" wire:model="temperatura" type="number" step="0.1" icon="o-fire" />
-                            <x-input label="Frec. Cardíaca (lpm)" wire:model="frecuencia_cardiaca" type="number" />
-                            <x-input label="Frec. Resp. (rpm)" wire:model="frecuencia_respiratoria" type="number" />
+                            <x-input label="Frec. Cardíaca (lpm)" wire:model="frecuencia_cardiaca" type="number" icon="o-heart" />
+                            <x-input label="Frec. Resp. (rpm)" wire:model="frecuencia_respiratoria" type="number" icon="o-variable" />
                         </div>
                     </div>
                 </div>
 
                 {{-- COLUMNA DERECHA: Datos Clínicos --}}
                 <div class="space-y-4">
-                    <x-input label="Motivo de Consulta" wire:model="motivo_consulta" required placeholder="Ej. Diarrea y vómitos desde ayer" />
+                    <x-input label="Motivo de Consulta" wire:model="motivo_consulta" required placeholder="Ej. Diarrea y vómitos desde ayer" autofocus />
                     
                     <x-textarea label="Anamnesis y Examen Físico" wire:model="anamnesis" rows="3" placeholder="Detalle los síntomas reportados y los hallazgos clínicos..." />
                     

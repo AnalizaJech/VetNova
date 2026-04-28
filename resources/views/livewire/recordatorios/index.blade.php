@@ -48,7 +48,7 @@
                                     
                                     @if($cita->mascota->cliente?->telefono)
                                         <x-button icon="o-chat-bubble-left-ellipsis" 
-                                            class="btn-sm {{ $cita->notificado_whatsapp ? 'btn-success' : 'btn-outline btn-success' }} !h-8 !min-h-0" 
+                                            class="btn-sm {{ $cita->notificado_whatsapp ? 'btn-success' : 'btn-outline btn-success' }} h-8! min-h-0!" 
                                             wire:click="enviarWhatsApp({{ $cita->id }}, 'Cita')" 
                                             tooltip="Enviar WhatsApp" spinner />
                                     @else
@@ -67,7 +67,7 @@
                                     
                                     @if($cita->mascota->cliente?->telefono)
                                         <x-button icon="o-device-phone-mobile" 
-                                            class="btn-sm {{ $cita->notificado_sms ? 'btn-neutral' : 'btn-outline btn-neutral' }} !h-8 !min-h-0" 
+                                            class="btn-sm {{ $cita->notificado_sms ? 'btn-neutral' : 'btn-outline btn-neutral' }} h-8! min-h-0!" 
                                             wire:click="enviarSMS({{ $cita->id }}, 'Cita')" 
                                             tooltip="Enviar SMS" spinner />
                                     @endif
@@ -81,7 +81,7 @@
                                     
                                     @if($cita->mascota->cliente?->email)
                                         <x-button icon="o-envelope" 
-                                            class="btn-sm {{ $cita->notificado_email ? 'btn-info' : 'btn-outline btn-info' }} !h-8 !min-h-0" 
+                                            class="btn-sm {{ $cita->notificado_email ? 'btn-info' : 'btn-outline btn-info' }} h-8! min-h-0!" 
                                             wire:click="enviarEmail({{ $cita->id }}, 'Cita')" 
                                             tooltip="Enviar Email" spinner />
                                     @else
@@ -141,7 +141,7 @@
                                     
                                     @if($registro->mascota->cliente?->telefono)
                                         <x-button icon="o-chat-bubble-left-ellipsis" 
-                                            class="btn-sm {{ $registro->notificado_whatsapp ? 'btn-success' : 'btn-outline btn-success' }} !h-8 !min-h-0" 
+                                            class="btn-sm {{ $registro->notificado_whatsapp ? 'btn-success' : 'btn-outline btn-success' }} h-8! min-h-0!" 
                                             wire:click="enviarWhatsApp({{ $registro->id }}, 'Vacuna')" 
                                             tooltip="Enviar WhatsApp" spinner />
                                     @else
@@ -160,7 +160,7 @@
                                     
                                     @if($registro->mascota->cliente?->telefono)
                                         <x-button icon="o-device-phone-mobile" 
-                                            class="btn-sm {{ $registro->notificado_sms ? 'btn-neutral' : 'btn-outline btn-neutral' }} !h-8 !min-h-0" 
+                                            class="btn-sm {{ $registro->notificado_sms ? 'btn-neutral' : 'btn-outline btn-neutral' }} h-8! min-h-0!" 
                                             wire:click="enviarSMS({{ $registro->id }}, 'Vacuna')" 
                                             tooltip="Enviar SMS" spinner />
                                     @endif
@@ -174,7 +174,7 @@
                                     
                                     @if($registro->mascota->cliente?->email)
                                         <x-button icon="o-envelope" 
-                                            class="btn-sm {{ $registro->notificado_email ? 'btn-info' : 'btn-outline btn-info' }} !h-8 !min-h-0" 
+                                            class="btn-sm {{ $registro->notificado_email ? 'btn-info' : 'btn-outline btn-info' }} h-8! min-h-0!" 
                                             wire:click="enviarEmail({{ $registro->id }}, 'Vacuna')" 
                                             tooltip="Enviar Email" spinner />
                                     @else

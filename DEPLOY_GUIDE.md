@@ -3,6 +3,7 @@
 ## ⚠️ Antes de empezar
 
 Railway da **$5 USD de crédito gratis al mes**, suficiente para:
+
 - 1 app Laravel (≈ $2-3/mes)
 - 1 base de datos MySQL (≈ $1-2/mes)
 
@@ -28,6 +29,7 @@ git push -u origin main
 ```
 
 **Archivos que debes agregar a la raíz del proyecto antes del commit:**
+
 - ✅ `nixpacks.toml` (incluido en esta carpeta)
 - ✅ `railway.toml` (incluido en esta carpeta)
 
@@ -35,7 +37,7 @@ git push -u origin main
 
 ## Paso 2 — Crea cuenta en Railway
 
-1. Ve a **https://railway.app**
+1. Ve a <https://railway.app>
 2. Haz clic en **"Start a New Project"**
 3. Inicia sesión con tu cuenta de **GitHub**
 
@@ -61,7 +63,7 @@ git push -u origin main
 
 En Railway → tu servicio Laravel → **"Variables"** → agrega una por una:
 
-```
+```env
 APP_NAME=VetNova
 APP_ENV=production
 APP_DEBUG=false
@@ -86,6 +88,7 @@ PERUAPI_BASE_URL=https://peruapi.com
 ```
 
 **Para generar APP_KEY:**
+
 ```bash
 # En tu máquina local, corre:
 php artisan key:generate --show
@@ -109,6 +112,7 @@ Si hay error, lee el log — casi siempre es una variable de entorno faltante.
 El `nixpacks.toml` ya corre `php artisan migrate --force` automáticamente al iniciar.
 
 Si necesitas correrlo manualmente:
+
 1. Railway → tu servicio → **"Settings"** → **"Deploy"** → sección **"Shell"**
 2. O en el log del deploy verás si las migraciones se corrieron
 
@@ -119,10 +123,12 @@ Si necesitas correrlo manualmente:
 1. Railway → tu servicio → **"Settings"** → **"Networking"** → **"Generate Domain"**
 2. Te da una URL como: `vetnova-production.up.railway.app`
 3. **IMPORTANTE — IP de Railway:** Ve a la sección **"Public Networking"** o corre desde el shell:
+
    ```bash
    curl https://api.ipify.org
    ```
-4. Ve a **peruapi.com/panel** → **"Gestión de IPs autorizadas"**
+
+4. Ve a <https://peruapi.com/panel> → **"Gestión de IPs autorizadas"**
 5. **Elimina tu IP local** (la de casa)
 6. **Agrega la IP de Railway** (es fija, no cambia)
 
@@ -131,6 +137,7 @@ Si necesitas correrlo manualmente:
 ## Paso 9 — Corre el Seeder (si necesitas datos iniciales)
 
 Desde Railway → Shell:
+
 ```bash
 php artisan db:seed --class=ClinicaSeeder
 php artisan db:seed --class=RolSeeder
@@ -166,12 +173,15 @@ php artisan about
 Dado que tu IP de casa cambia, tienes dos opciones:
 
 ### Opción A — Usar la IP de Railway (recomendado)
-Deploy en Railway → IP fija → actualizar peruapi.com una sola vez ✅
+
+Deploy en Railway → IP fija → actualizar <https://peruapi.com> una sola vez ✅
 
 ### Opción B — Seguir en local con IP dinámica
-Cada vez que cambie tu IP, entrar a peruapi.com/panel y actualizarla. Tedioso pero gratuito.
+
+Cada vez que cambie tu IP, entrar a <https://peruapi.com/panel> y actualizarla. Tedioso pero gratuito.
 
 ### Opción C — Proxy/VPN con IP fija
+
 Usar un servicio como **Cloudflare Tunnel** o **ngrok** para tener una IP/URL fija en local.
 
 ---
@@ -179,7 +189,7 @@ Usar un servicio como **Cloudflare Tunnel** o **ngrok** para tener una IP/URL fi
 ## 💰 Costo estimado en Railway (plan gratis)
 
 | Servicio | Costo/mes |
-|----------|-----------|
+| :--- | :--- |
 | App Laravel (512MB RAM) | ~$2.50 |
 | MySQL (1GB) | ~$1.00 |
 | **Total** | **~$3.50** |
@@ -193,7 +203,7 @@ El crédito alcanza con margen. Si crece el tráfico, puedes upgrade a $20/mes.
 ## 🆘 Problemas comunes
 
 | Error | Causa | Solución |
-|-------|-------|----------|
+| :--- | :--- | :--- |
 | `APP_KEY not set` | Falta la variable | Genera con `php artisan key:generate --show` |
 | `SQLSTATE: Connection refused` | Variables DB mal configuradas | Usa `${{MySQL.MYSQL_HOST}}` exactamente así |
 | `DNI no encontrado` | IP de Railway no en peruapi.com | Actualiza la IP en peruapi.com/panel |

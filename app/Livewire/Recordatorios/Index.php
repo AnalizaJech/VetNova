@@ -34,7 +34,10 @@ class Index extends Component
 
         $cliente = $item->mascota->cliente;
         $nombreMascota = $item->mascota->nombre;
-        $msg = "Hola {$cliente->nombres}, recordatorio de VetNova para $nombreMascota. ¡Te esperamos!";
+        $fecha = $tipoObj === 'Cita' ? $item->fecha_hora->format('d/m/Y h:i A') : $item->fecha_proxima->format('d/m/Y');
+        $asunto = $tipoObj === 'Cita' ? 'tu cita' : "el refuerzo de {$item->producto_o_enfermedad}";
+        
+        $msg = "Hola {$cliente->nombres}, recordatorio de VetNova: tienes $asunto para $nombreMascota el día $fecha. ¡Te esperamos!";
         
         try {
             if ($notifications->sendWhatsApp($cliente->telefono, $msg)) {
@@ -60,7 +63,10 @@ class Index extends Component
 
         $cliente = $item->mascota->cliente;
         $nombreMascota = $item->mascota->nombre;
-        $msg = "VetNova: Recordatorio para $nombreMascota hoy/mañana. ¡Te esperamos!";
+        $fecha = $tipoObj === 'Cita' ? $item->fecha_hora->format('d/m/Y h:i A') : $item->fecha_proxima->format('d/m/Y');
+        $asunto = $tipoObj === 'Cita' ? 'Cita' : 'Refuerzo';
+        
+        $msg = "VetNova: $asunto para $nombreMascota el $fecha. ¡Te esperamos!";
         
         try {
             if ($notifications->sendSMS($cliente->telefono, $msg)) {
