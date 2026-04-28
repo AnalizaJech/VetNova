@@ -2,10 +2,10 @@
 # railway.toml — Configuración de Railway
 # Coloca en la RAÍZ del proyecto (junto a composer.json)
 # ============================================================
- 
+
 [build]
 builder = "NIXPACKS"
- 
+
 [deploy]
 # Sin healthcheck para el primer deploy — una vez que funcione
 # puedes re-activarlo apuntando a /health
