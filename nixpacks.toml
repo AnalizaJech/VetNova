@@ -1,10 +1,13 @@
-# Configuración de construcción para Railway
+# Configuración Nixpacks para Laravel en Railway
+[phases.setup]
+nixPkgs = ["php82", "php82Packages.composer", "nodejs_20", "libmysqlclient"]
+
 [phases.build]
 cmds = [
     "composer install --no-dev --optimize-autoloader",
     "npm install",
-    "npm run build"
+    "npm run build",
+    "php artisan optimize"
 ]
 
-[start]
-cmd = "php artisan migrate --force && apache2-foreground"
+# Las migraciones se ejecutan mediante el preDeployCommand en railway.toml
