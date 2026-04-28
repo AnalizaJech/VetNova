@@ -1,0 +1,24 @@
+# ============================================================
+# .dockerignore — Archivos excluidos del build Docker
+# ============================================================
+.git
+.github
+node_modules
+vendor
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+public/hot
+.env
+.env.*
+!.env.example
+*.log
+README.md
+e2e/
+playwright/
+docker-entrypoint.sh
+Dockerfile
+railway.toml
+nixpacks.toml
+.dockerignore
