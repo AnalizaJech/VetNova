@@ -114,15 +114,16 @@
                 <x-select label="Categoría" wire:model="categoria" :options="$categorias_fijas" required />
             </div>
 
-            <x-input 
-                label="Nombre / Descripción" 
-                wire:model="nombre" 
-                required 
-                placeholder="Ej. Vacuna Quíntuple Zoetis" 
-                autocomplete="off" 
-                icon="o-pencil-square"
-                class="mb-4" 
-            />
+            <div class="mb-4">
+                <x-input 
+                    label="Nombre / Descripción" 
+                    wire:model="nombre" 
+                    required 
+                    placeholder="Ej. Vacuna Quíntuple Zoetis" 
+                    autocomplete="off" 
+                    icon="o-pencil-square"
+                />
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <x-input label="Precio de Venta (S/)" wire:model="precio_venta" type="number" step="0.01" required icon="o-currency-dollar" class="font-bold text-success" />

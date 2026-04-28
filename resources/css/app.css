@@ -66,8 +66,10 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
 .input:focus, 
 .input:focus-within, 
 .select:focus,
+.select:focus-within,
 .textarea:focus,
-select:focus {
+select:focus,
+.mary-choices:focus-within {
     border-color: #64748B !important; /* Slate-500 más serio */
     outline: none !important;
     box-shadow: none !important;
@@ -108,6 +110,22 @@ textarea {
     resize: none !important;
 }
 
-textarea {
-    resize: none !important;
+/* ── Alineación Vertical Perfecta en Inputs ── */
+.input, .select, .textarea {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: normal !important;
+}
+
+.input input {
+    height: 100% !important;
+    margin: 0 !important;
+    padding-top: 2px !important; /* Compensación para alineación visual en Windows */
+    display: flex !important;
+    align-items: center !important;
+}
+
+.input i, .input svg {
+    align-self: center !important;
 }
