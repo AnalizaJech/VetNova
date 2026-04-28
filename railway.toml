@@ -2,6 +2,6 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "php artisan migrate --force && apache2-foreground"
+preDeployCommand = "chmod +x ./railway/init-app.sh && ./railway/init-app.sh"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3

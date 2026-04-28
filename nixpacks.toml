@@ -1,4 +1,4 @@
-# Configuración de construcción para Railway
+# Configuración Nixpacks para Laravel en Railway
 [phases.build]
 cmds = [
     "composer install --no-dev --optimize-autoloader",
@@ -6,5 +6,6 @@ cmds = [
     "npm run build"
 ]
 
-[start]
-cmd = "php artisan migrate --force && apache2-foreground"
+# Las migraciones NO deben ir aquí. Se deben configurar en el 
+# "Pre-Deploy Command" del panel de Railway:
+# Comand: chmod +x ./railway/init-app.sh && ./railway/init-app.sh
