@@ -1,113 +1,71 @@
-# VetNova — Software de Gestión Veterinaria (SaaS)
+# VetNova — Ecosistema Digital de Gestión Veterinaria Avanzada (SaaS)
 
-## Objetivo
-Proveer un sistema integral, rápido y fácil de usar para clínicas veterinarias en Perú, permitiendo gestionar en un solo lugar la agenda de citas, el historial médico, el control de inventario preventivo y la emisión de comprobantes electrónicos de pago (SUNAT).
+> **Documentación Técnica y Memoria Descriptiva de Innovación Tecnológica**  
+> *Preparado para especificaciones de propiedad intelectual y registros de utilidad.*
 
-## Problema que resuelve
-Las clínicas veterinarias a menudo operan con sistemas desconectados (Excel para el inventario, papel para historias clínicas, y portales lentos para facturar). VetNova unifica esto en un entorno multi-tenant automatizando flujos críticos, como el descuento inmediato de inventario al vender y el auto-completado de DNI/RUC para acelerar la recepción.
+## 1. Resumen Ejecutivo
+**VetNova** es una plataforma de software distribuida (SaaS) diseñada bajo una arquitectura multi-inquilino (Multi-tenant) que automatiza y centraliza la operatividad clínica, comercial y logística de establecimientos veterinarios. El sistema integra procesos de triaje clínico, facturación electrónica legal (SUNAT), gestión de inventario inmutable (Kardex) y un motor de notificaciones omnicanal asíncrono.
 
-## Tecnologías
-- **Backend:** Laravel 11, PHP 8.3
-- **Frontend:** Livewire 3, Alpine.js, Tailwind CSS v4, Mary UI
-- **Base de Datos:** MySQL 8 / MariaDB
-- **Integraciones:** PeruAPI (para consulta rápida de DNI/RUC) y Nubefact (para facturación electrónica a SUNAT)
+## 2. Descripción del Problema y Solución Técnica
+### 2.1 Problema Identificado
+La gestión veterinaria tradicional adolece de fragmentación de datos: las historias clínicas no se comunican con el inventario, y la comunicación con el cliente depende de procesos manuales propensos al error humano.
 
-## Arquitectura
-- **Multi-tenancy Lógico:** Todos los registros (ventas, citas, clientes, mascotas) están rigurosamente filtrados por un `clinica_id` a nivel de base de datos.
-- **Frontend Reactivo:** Se utiliza Livewire para mantener un flujo similar a una SPA (Single Page Application), permitiendo validaciones asíncronas y renderizado rápido sin recargar la página.
-- **Servicios Aislados:** Clases dedicadas en `app/Services` (`NubefactService`, `PeruApiService`) que abstraen la complejidad y cambios de las APIs de terceros, protegiendo los controladores principales.
+### 2.2 Solución Innovadora (Métrica de Utilidad)
+VetNova implementa un **Motor de Sincronización Clínica-Comercial**. Cuando un médico prescribe un fármaco en la Historia Clínica, el sistema reserva automáticamente el stock en el inventario y genera una pre-orden en el Punto de Venta (POS), eliminando la duplicidad de tareas y garantizando que ningún tratamiento quede sin facturar o sin registro logístico.
 
----
+## 3. Especificaciones Técnicas y Stack
+- **Núcleo de Procesamiento:** PHP 8.3 / Laravel 11 (Framework de alta concurrencia).
+- **Capa de Reactividad:** Livewire 3 + Alpine.js (SPA feel sin sobrecarga de JS).
+- **Sistema de Diseño:** Tailwind CSS v4 + Mary UI (Aesthetics "Pro Max" premium).
+- **Base de Datos:** MySQL 8 con motor InnoDB y soporte para transacciones ACID.
+- **Motor de Notificaciones:** Integración con Twilio (WhatsApp/SMS) y Resend (Email SMTP dinámico).
+- **Integraciones Externas:**
+  - **PeruAPI:** Protocolo de consulta RUC/DNI en milisegundos.
+  - **Nubefact:** Pasarela de Facturación Electrónica compatible con estándares SUNAT.
 
-## Instalación y Configuración Local
+## 4. Arquitectura del Sistema
+### 4.1 Multi-tenancy Lógico
+Aislamiento estricto de datos a nivel de capa de consulta. Cada tabla crítica (`ventas`, `citas`, `pacientes`) incluye un índice compuesto por `clinica_id`, garantizando que la información de una clínica sea invisible para otra, incluso en la misma base de datos física.
 
-Sigue estos pasos para desplegar el proyecto localmente.
+### 4.2 Patrón Service Layer
+Implementación de servicios desacoplados en `app/Services`:
+- **NotificationService:** Gestiona la lógica de formateo E.164 para telefonía y plantillas HTML para correos.
+- **KardexService:** Algoritmo de cálculo de saldos basado en el historial inmutable de movimientos.
 
-### 1. Clonar e Instalar Dependencias
-```bash
-git clone https://github.com/AnalizaJech/VetNova.git
-cd VetNova
-composer install
-npm install
-```
+## 5. Módulos Funcionales Detallados
 
-### 2. Variables de Entorno
-Copia el archivo base y genera la clave de tu aplicación.
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+### 5.1 Gestión Clínica y Expediente Digital
+- **Historia Clínica Orientada a Problemas (HCOP):** Registro cronológico de consultas, triaje (peso, temperatura, frecuencia cardíaca), diagnóstico y planes de tratamiento.
+- **Hospitalización (Internamiento):** Panel de control de ocupación de caniles con bitácora de evolución médica minuto a minuto.
 
-Configura tu base de datos y agrega los tokens de los servicios en el `.env`:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=vetnova
-DB_USERNAME=root
-DB_PASSWORD=
+### 5.2 Motor de Notificaciones Omnicanal
+- **Automatización de Recordatorios:** Algoritmo que identifica citas y refuerzos de vacunas próximos (ventana de 48h).
+- **Omnicanalidad Real:** Permite el envío de recordatorios vía WhatsApp, SMS tradicional y Correo Electrónico con un solo clic, utilizando datos sincronizados en tiempo real del cliente.
 
-# APIs
-PERUAPI_KEY="tu_token_peruapi_aqui"
-NUBEFACT_URL="https://api.nubefact.com/api/v1/.../invoice"
-NUBEFACT_TOKEN="tu_token_nubefact_aqui"
-```
+### 5.3 Control Logístico (Kardex Inmutable)
+- **Gestión de Stock:** Diferenciación técnica entre productos físicos (medicinas, alimentos) y servicios (baños, consultas).
+- **Trazabilidad Total:** Registro inmutable de cada entrada (compra) y salida (venta/ajuste), permitiendo auditorías de inventario retroactivas.
 
-## Base de Datos
+### 5.4 Punto de Venta (POS) y Facturación
+- **Caja Rápida:** Buscador asíncrono de productos y clientes.
+- **Validación SUNAT:** Emisión de Boletas y Facturas electrónicas mediante integración REST API.
+- **Cierre de Caja:** Reporte detallado de ingresos por método de pago (Efectivo, Yape/Plin, Tarjetas).
 
-El sistema utiliza exclusivamente MySQL/MariaDB. En la carpeta `/database` se encuentra el archivo `database.sql` que contiene la estructura final del esquema de la base de datos (con Kardex, Prescripciones y tablas de seguridad). 
+## 6. Seguridad y Permisos
+- **RBAC (Role-Based Access Control):** Implementado vía Spatie, permitiendo roles como `super_admin`, `veterinario`, `recepcionista` y `vendedor`, con permisos granulares por módulo.
+- **Validación de Datos:** Uso intensivo de Form Requests y validaciones en tiempo real de Livewire para prevenir inyecciones y datos corruptos.
 
-> **Nota:** Debido a que VetNova utiliza vistas y triggers complejos en versiones futuras, la regla de oro para desplegar en un entorno nuevo es importar directamente el SQL proporcionado o ejecutar las migraciones frescas.
+## 7. Instalación y Despliegue
+1. **Dependencias:** `composer install` & `npm install`.
+2. **Entorno:** Configurar `.env` con credenciales de DB y API Keys de Twilio/Resend.
+3. **Persistencia:** `php artisan migrate --seed` (Incluye datos base para pruebas).
+4. **Build:** `npm run build` para optimizar activos en producción.
 
-```bash
-# Opción 1: Migrar y sembrar datos base (Recomendado)
-php artisan migrate:fresh --seed
-```
-
-*(Si necesitas exportar la estructura manualmente, usa: `mysqldump -u root vetnova > database/database.sql` en la terminal de tu servidor de BD).*
-
-### Usuarios de Prueba
-Tras la migración, usa estas credenciales para entrar al sistema como `super_admin`:
-- **Correo:** `admin@vetnova.pe`
-- **Contraseña:** `password`
-
-## Compilar e Iniciar el Servidor
-
-Para que el frontend funcione correctamente (compilando las clases de Tailwind de MaryUI):
-```bash
-# Compilar vistas y estilos una sola vez (Recomendado para testing rápido)
-npm run build
-
-# O en entorno de desarrollo para escuchar cambios
-npm run dev
-```
-
-Finalmente, levanta el servidor web:
-```bash
-php artisan serve
-```
-El sistema estará disponible en `http://localhost:8000`.
+## 8. Visión de Escalabilidad
+El sistema está preparado para la implementación de:
+- **Telemedicina:** Módulo de videoconsultas integrado.
+- **Analítica Predictiva:** Uso de IA para predecir picos de demanda en vacunas estacionales.
+- **APP Cliente:** Aplicación móvil para que los dueños de mascotas consulten sus registros médicos.
 
 ---
-
-## Decisiones Técnicas Destacadas
-- **SPA Liviana:** Se eligió el ecosistema de **Livewire + Mary UI** sobre Next.js/React para eliminar la sobrecarga de mantener dos repositorios separados. Se alcanza una UX premium asíncrona pero manejada directamente con la potencia de PHP.
-- **Buscadores Asíncronos:** Módulos críticos como la *Caja (POS)* y *Citas* utilizan `x-choices` asíncronos para evitar colapsos de memoria.
-- **Tickets Térmicos vía Web:** Se optó por usar `@media print` directo desde Blade en vez de librerías pesadas como DOMPDF, esto permite invocar a `window.print()` nativamente y adaptar tickets instantáneos para tiqueteras de 80mm.
-- **Seguridad Multi-Tenant Estricta:** Las rutas, scopes de Livewire y validaciones `OrFail` siempre incluyen `where('clinica_id', ...)` acoplado a middleware de permisos Spatie Role/Permission.
-- **Control de Concurrencia:** La lógica de caja implementa bloqueos de base de datos pesimistas (`lockForUpdate`) para evitar ventas de stock negativo bajo alta concurrencia.
-
-## 🏥 Módulos Principales
-1. **Punto de Venta (Caja) y Facturación Inteligente**: Integración con Nubefact, cálculo de IGV, control de caja y emisión.
-2. **Historias Clínicas, Triaje y Prescripciones**: Flujo médico completo. Las prescripciones se entrelazan con el inventario para facilitar el despacho en caja.
-3. **Control de Vacunas**: Calendario de registro preventivo (vacunas, antipulgas).
-4. **Inventario Híbrido y Kardex Inmutable**: Control dual de "Productos" y "Servicios". Cada compra, venta o ajuste manual se audita automáticamente en un *Kardex inmutable* de control logístico.
-5. **Hospitalización (Internamiento)**: Panel de control visual de camas, bitácora de evolución médica (notas) y sistema de altas.
-6. **Centro de Recordatorios**: Panel automatizado para gestionar las citas y vacunas pendientes del día (preparado para integración Twilio WhatsApp).
-7. **Panel de Configuración y Seguridad**: CRUD de usuarios internos con asignación de roles jerárquicos (Spatie) y administración general de la clínica/sucursales.
-8. **Reportes y Analíticas**: Dashboard gerencial con Chart.js para medir KPIs en tiempo real.
-
-## 🚀 Futuras Mejoras 
-- Portal de auto-servicio para que los clientes vean las recetas de sus mascotas.
-- Integración contable para multi-cajas simultáneas.
-- Implementación total del flujo E2E Testing (Pest + Playwright).
+**VetNova** no es solo un software, es la columna vertebral tecnológica para la modernización del sector veterinario.

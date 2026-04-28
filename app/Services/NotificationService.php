@@ -58,16 +58,21 @@ class NotificationService
         if (!$this->twilio) return false;
 
         try {
-            $from = env('TWILIO_FROM');
+            $messagingServiceSid = env('TWILIO_MESSAGING_SERVICE_SID');
+            $payload = ['body' => $body];
+
+            if ($messagingServiceSid) {
+                $payload['messagingServiceSid'] = $messagingServiceSid;
+            } else {
+                $payload['from'] = env('TWILIO_FROM');
+            }
+
             $formattedTo = $to;
             if (!str_starts_with($formattedTo, '+')) {
                 $formattedTo = "+51" . $formattedTo;
             }
 
-            $this->twilio->messages->create($formattedTo, [
-                'from' => $from,
-                'body' => $body
-            ]);
+            $this->twilio->messages->create($formattedTo, $payload);
 
             return true;
         } catch (\Exception $e) {
