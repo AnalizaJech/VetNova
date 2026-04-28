@@ -107,3 +107,7 @@ input[type=number] {
 textarea {
     resize: none !important;
 }
+
+textarea {
+    resize: none !important;
+}

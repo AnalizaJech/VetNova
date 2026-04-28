@@ -175,6 +175,7 @@
     </x-modal>
 
     {{-- Modal Visor Completo --}}
+    {{-- Modal Visor Completo --}}
     <x-modal wire:model="modalVer" title="Expediente Clínico" subtitle="{{ $historiaSeleccionada?->fecha->format('d/m/Y h:i A') }}" separator class="backdrop-blur-sm" box-class="max-w-4xl">
         @if($historiaSeleccionada)
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -184,10 +185,8 @@
                     {{-- Paciente --}}
                     <div class="bg-base-200/50 p-4 rounded-xl border border-base-200">
                         <div class="flex items-center gap-3 mb-2">
-                            <div class="avatar placeholder">
-                                <div class="bg-primary/20 text-primary rounded-full w-12">
-                                    <x-icon name="o-heart" class="w-6 h-6" />
-                                </div>
+                            <div class="bg-primary/10 p-2 rounded-lg">
+                                <x-icon name="o-heart" class="w-6 h-6 text-primary" />
                             </div>
                             <div>
                                 <h3 class="font-bold text-lg leading-none">{{ $historiaSeleccionada->mascota->nombre }}</h3>
@@ -206,20 +205,20 @@
                     <div class="bg-base-200/50 p-4 rounded-xl border border-base-200">
                         <h4 class="font-bold text-sm mb-3 border-b border-base-300 pb-2">Constantes (Triage)</h4>
                         <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60"><x-icon name="o-scale" class="w-4 h-4 inline" /> Peso:</span>
+                            <div class="flex justify-between border-b border-base-300/30 pb-1">
+                                <span class="text-base-content/60">Peso:</span>
                                 <span class="font-semibold">{{ $historiaSeleccionada->peso ? $historiaSeleccionada->peso . ' kg' : 'N/A' }}</span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60"><x-icon name="o-fire" class="w-4 h-4 inline" /> Temp:</span>
+                            <div class="flex justify-between border-b border-base-300/30 pb-1">
+                                <span class="text-base-content/60">Temp:</span>
                                 <span class="font-semibold">{{ $historiaSeleccionada->temperatura ? $historiaSeleccionada->temperatura . ' °C' : 'N/A' }}</span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-base-content/60"><x-icon name="o-heart" class="w-4 h-4 inline" /> Frec. Cardíaca:</span>
+                            <div class="flex justify-between border-b border-base-300/30 pb-1">
+                                <span class="text-base-content/60">F. Cardíaca:</span>
                                 <span class="font-semibold">{{ $historiaSeleccionada->frecuencia_cardiaca ? $historiaSeleccionada->frecuencia_cardiaca . ' lpm' : 'N/A' }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-base-content/60"><x-icon name="o-sparkles" class="w-4 h-4 inline" /> Frec. Resp:</span>
+                                <span class="text-base-content/60">F. Resp:</span>
                                 <span class="font-semibold">{{ $historiaSeleccionada->frecuencia_respiratoria ? $historiaSeleccionada->frecuencia_respiratoria . ' rpm' : 'N/A' }}</span>
                             </div>
                         </div>
@@ -240,24 +239,21 @@
                     </div>
 
                     <div class="bg-base-100 p-4 rounded-xl border border-warning/30 shadow-sm">
-                        <h4 class="text-xs font-bold text-warning uppercase tracking-wider mb-2"><x-icon name="o-magnifying-glass" class="w-4 h-4 inline" /> Diagnóstico Presuntivo</h4>
+                        <h4 class="text-xs font-bold text-warning uppercase tracking-wider mb-2">Diagnóstico Presuntivo</h4>
                         <p class="text-sm whitespace-pre-wrap font-medium">{{ $historiaSeleccionada->diagnostico_presuntivo ?: 'Sin diagnóstico registrado.' }}</p>
                     </div>
 
                     <div class="bg-base-100 p-4 rounded-xl border border-success/30 shadow-sm">
-                        <h4 class="text-xs font-bold text-success uppercase tracking-wider mb-2"><x-icon name="o-beaker" class="w-4 h-4 inline" /> Tratamiento e Indicaciones</h4>
+                        <h4 class="text-xs font-bold text-success uppercase tracking-wider mb-2">Tratamiento e Indicaciones</h4>
                         <p class="text-sm whitespace-pre-wrap mb-4">{{ $historiaSeleccionada->tratamiento_indicaciones ?: 'Sin indicaciones.' }}</p>
                         
                         @if($historiaSeleccionada->prescripciones->isNotEmpty())
                             <div class="space-y-2 pt-2 border-t border-success/10">
-                                <p class="text-xs font-bold text-success/60 uppercase tracking-widest mb-2">Medicamentos recetados:</p>
                                 @foreach($historiaSeleccionada->prescripciones as $p)
-                                    <div class="flex items-center gap-2 text-sm bg-success/5 p-2 rounded-lg">
-                                        <x-icon name="o-chevron-right" class="w-3 h-3 text-success" />
-                                        <span class="font-bold">{{ $p->medicamento }}</span>
+                                    <div class="text-sm bg-success/5 p-2 rounded-lg border border-success/10">
+                                        <span class="font-bold text-success">{{ $p->medicamento }}</span>
                                         <span class="text-base-content/70">({{ $p->dosis }})</span>
                                         @if($p->frecuencia) <span class="text-xs italic text-base-content/50"> - {{ $p->frecuencia }}</span> @endif
-                                        @if($p->duracion) <span class="text-xs italic text-base-content/50"> por {{ $p->duracion }}</span> @endif
                                     </div>
                                 @endforeach
                             </div>
@@ -276,7 +272,7 @@
         @endif
 
         <x-slot:actions>
-            <x-button label="Imprimir" icon="o-printer" class="btn-ghost" disabled />
+            <x-button label="Imprimir" icon="o-printer" class="btn-primary" onclick="window.print()" />
             <x-button label="Cerrar" @click="$wire.modalVer = false" class="btn-neutral" />
         </x-slot:actions>
     </x-modal>

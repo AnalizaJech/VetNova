@@ -204,16 +204,18 @@ class Index extends Component
             'fecha' => 'required|date',
             'hora' => 'required|date_format:H:i',
             'motivo_consulta' => 'required|string|max:255',
+            'anamnesis' => 'required|string|min:10', // Lo básico para culminar
+            'diagnostico_presuntivo' => 'required|string|min:5', // Lo básico para culminar
             'peso' => 'nullable|numeric|min:0|max:500',
             'temperatura' => 'nullable|numeric|min:20|max:50',
             'frecuencia_cardiaca' => 'nullable|integer|min:0|max:300',
             'frecuencia_respiratoria' => 'nullable|integer|min:0|max:150',
-            'anamnesis' => 'nullable|string',
-            'diagnostico_presuntivo' => 'nullable|string',
             'tratamiento_indicaciones' => 'nullable|string',
             'proxima_cita_recomendada' => 'nullable|date|after_or_equal:today',
         ], [
             'mascota_id.required' => 'Debes seleccionar el paciente para esta consulta.',
+            'anamnesis.required' => 'La Anamnesis y Examen Físico son obligatorios para guardar la consulta.',
+            'diagnostico_presuntivo.required' => 'El Diagnóstico Presuntivo es obligatorio.',
         ]);
 
         $clinica_id = Auth::user()->clinica_id;
