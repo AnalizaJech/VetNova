@@ -1,14 +1,14 @@
-# 🐾 VetNova — Sistema Integral de Gestión Veterinaria
+# 🐾 VetNeoLink — Sistema Integral de Gestión Veterinaria
 
-VetNova es una plataforma SaaS de alto rendimiento diseñada específicamente para modernizar y optimizar la operación de clínicas veterinarias. No es solo un software de administración; es un ecosistema técnico que garantiza la trazabilidad médica, la eficiencia operativa y una experiencia premium para el cliente final.
+VetNeoLink es una plataforma SaaS de alto rendimiento diseñada específicamente para modernizar y optimizar la operación de clínicas veterinarias. No es solo un software de administración; es un ecosistema técnico que garantiza la trazabilidad médica, la eficiencia operativa y una experiencia premium para el cliente final.
 
 ## 🎯 Objetivo del Proyecto
 
-El objetivo de VetNova es centralizar todos los procesos críticos de una clínica veterinaria —desde la agenda médica hasta la facturación electrónica y el control estricto de inventario— bajo una interfaz moderna, rápida y segura que minimice el error humano y maximice la rentabilidad.
+El objetivo de VetNeoLink es centralizar todos los procesos críticos de una clínica veterinaria —desde la agenda médica hasta la facturación electrónica y el control estricto de inventario— bajo una interfaz moderna, rápida y segura que minimice el error humano y maximice la rentabilidad.
 
 ## 🚀 Problemas que Resuelve
 
-1. **Pérdida de Trazabilidad Médica:** Historiales clínicos desordenados o ilegibles. VetNova ofrece un sistema de Historias Clínicas estructurado con motor de impresión profesional.
+1. **Pérdida de Trazabilidad Médica:** Historiales clínicos desordenados o ilegibles. VetNeoLink ofrece un sistema de Historias Clínicas estructurado con motor de impresión profesional.
 2. **Descontrol de Inventario:** Pérdida de dinero por productos vencidos o stock no registrado. Nuestro **Kardex Profesional** rastrea lotes, vencimientos y costos históricos.
 3. **Ausentismo en Citas:** Notificaciones automáticas vía WhatsApp, SMS y Email para reducir las inasistencias.
 4. **Complejidad Administrativa:** Integración con **PeruAPI** para búsqueda instantánea de DNI/RUC y cumplimiento con **Nubefact** para facturación electrónica.
@@ -26,7 +26,7 @@ El objetivo de VetNova es centralizar todos los procesos críticos de una clíni
 
 ## 🏗️ Arquitectura del Sistema
 
-VetNova sigue una arquitectura modular y desacoplada, priorizando la mantenibilidad:
+VetNeoLink sigue una arquitectura modular y desacoplada, priorizando la mantenibilidad:
 
 ```text
 /app
@@ -52,7 +52,7 @@ VetNova sigue una arquitectura modular y desacoplada, priorizando la mantenibili
 ### 📦 Inventario & Kardex Profesional
 
 * **Trazabilidad Total:** Registro obligatorio de Lote y Fecha de Vencimiento para biológicos y fármacos críticos.
-* **Costeo Histórico:** A diferencia de sistemas básicos, VetNova registra el costo unitario de cada transacción, permitiendo auditorías financieras precisas.
+* **Costeo Histórico:** A diferencia de sistemas básicos, VetNeoLink registra el costo unitario de cada transacción, permitiendo auditorías financieras precisas.
 * **Alertas de Reposición:** Sistema de semaforización basado en `stock_minimo`.
 
 ### 📅 Agenda y Notificaciones
@@ -70,8 +70,8 @@ VetNova sigue una arquitectura modular y desacoplada, priorizando la mantenibili
 1. **Clonar el repositorio:**
 
 ```bash
-git clone https://github.com/usuario/vetnova.git
-cd vetnova
+git clone https://github.com/AnalizaJech/VetNova.git
+cd VetNova
 ```
 
 2. **Instalar dependencias:**
@@ -93,7 +93,7 @@ php artisan migrate --seed
 
 ## 🚀 Despliegue (Railway)
 
-VetNova está optimizado para desplegarse en **Railway** en cuestión de minutos:
+VetNeoLink está optimizado para desplegarse en **Railway** en cuestión de minutos:
 
 1. El proyecto incluye los archivos `nixpacks.toml` y `railway.toml` para configuración automática.
 2. Conecta tu repositorio de GitHub a un nuevo proyecto en Railway.

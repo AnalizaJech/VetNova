@@ -17,9 +17,9 @@ uses(RefreshDatabase::class);
 it('valida que una boleta se formatea sin errores si no hay cliente (null-safe)', function () {
     // 1. Preparar datos
     $clinica = Clinica::create([
-        'nombre' => 'VetNova Test',
+        'nombre' => 'VetNeoLink Test',
         'ruc' => '20123456789',
-        'razon_social' => 'VetNova Test SAC',
+        'razon_social' => 'VetNeoLink Test SAC',
     ]);
 
     $cajero = User::create([
@@ -88,9 +88,9 @@ it('valida que una boleta se formatea sin errores si no hay cliente (null-safe)'
 
 it('valida que una factura exige un cliente con RUC', function () {
     $clinica = Clinica::create([
-        'nombre' => 'VetNova Test',
+        'nombre' => 'VetNeoLink Test',
         'ruc' => '20123456789',
-        'razon_social' => 'VetNova Test SAC',
+        'razon_social' => 'VetNeoLink Test SAC',
     ]);
 
     $cajero = User::create([

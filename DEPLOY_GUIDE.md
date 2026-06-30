@@ -1,4 +1,4 @@
-# 🚀 Guía de Deploy Profesional — VetNova en Railway
+# 🚀 Guía de Deploy Profesional — VetNeoLink en Railway
 
 Siguiendo la documentación oficial de Railway para Laravel, aquí tienes los pasos exactos para corregir el error de compilación y desplegar con éxito.
 
@@ -88,4 +88,4 @@ php artisan optimize:clear
 
 ---
 
-**VetNova** está ahora alineado con la arquitectura recomendada por Railway para apps Laravel modernas.
+**VetNeoLink** está ahora alineado con la arquitectura recomendada por Railway para apps Laravel modernas.

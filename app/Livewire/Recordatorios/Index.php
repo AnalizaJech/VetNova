@@ -15,7 +15,7 @@ use App\Traits\AlertModal;
 use Resend\Laravel\Facades\Resend;
 
 #[Layout('components.layouts.app')]
-#[Title('Centro de Recordatorios — VetNova')]
+#[Title('Centro de Recordatorios — VetNeoLink')]
 class Index extends Component
 {
     use AlertModal;
@@ -37,7 +37,7 @@ class Index extends Component
         $fecha = $tipoObj === 'Cita' ? $item->fecha_hora->format('d/m/Y h:i A') : $item->fecha_proxima->format('d/m/Y');
         $asunto = $tipoObj === 'Cita' ? 'tu cita' : "el refuerzo de {$item->producto_o_enfermedad}";
         
-        $msg = "Hola {$cliente->nombres}, recordatorio de VetNova: tienes $asunto para $nombreMascota el día $fecha. ¡Te esperamos!";
+        $msg = "Hola {$cliente->nombres}, recordatorio de VetNeoLink: tienes $asunto para $nombreMascota el día $fecha. ¡Te esperamos!";
         
         try {
             if ($notifications->sendWhatsApp($cliente->telefono, $msg)) {
@@ -66,7 +66,7 @@ class Index extends Component
         $fecha = $tipoObj === 'Cita' ? $item->fecha_hora->format('d/m/Y h:i A') : $item->fecha_proxima->format('d/m/Y');
         $asunto = $tipoObj === 'Cita' ? 'Cita' : 'Refuerzo';
         
-        $msg = "VetNova: $asunto para $nombreMascota el $fecha. ¡Te esperamos!";
+        $msg = "VetNeoLink: $asunto para $nombreMascota el $fecha. ¡Te esperamos!";
         
         try {
             if ($notifications->sendSMS($cliente->telefono, $msg)) {
@@ -100,7 +100,7 @@ class Index extends Component
         $html = "
             <div style='font-family: sans-serif; color: #1e293b; max-width: 600px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;'>
                 <div style='background: #4f46e5; padding: 20px; text-align: center;'>
-                    <h1 style='color: white; margin: 0; font-size: 24px;'>Recordatorio VetNova</h1>
+                    <h1 style='color: white; margin: 0; font-size: 24px;'>Recordatorio VetNeoLink</h1>
                 </div>
                 <div style='padding: 30px; background: white;'>
                     <h2 style='color: #1e293b; margin-top: 0;'>Hola {$cliente->nombres},</h2>
@@ -115,12 +115,12 @@ class Index extends Component
                     </p>
                 </div>
                 <div style='background: #f1f5f9; padding: 15px; text-align: center; font-size: 12px; color: #94a3b8;'>
-                    VetNova — Gestión Veterinaria Profesional
+                    VetNeoLink — Gestión Veterinaria Profesional
                 </div>
             </div>
         ";
 
-        if ($notifications->sendEmail($cliente->email, "Recordatorio de $tipoMsg — VetNova", $html)) {
+        if ($notifications->sendEmail($cliente->email, "Recordatorio de $tipoMsg — VetNeoLink", $html)) {
             $this->marcarComoNotificado($id, $tipoObj, 'email');
             $this->success("Correo enviado con éxito.");
         } else {

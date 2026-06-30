@@ -188,7 +188,7 @@
             document.body.appendChild(iframe);
             
             const doc = iframe.contentWindow.document;
-            doc.write('<html><head><title>VetNova - Historia Clínica</title>');
+            doc.write('<html><head><title>VetNeoLink - Historia Clínica</title>');
             doc.write('<style>');
             doc.write('@@page { margin: 1.5cm; size: A4; }');
             doc.write('body { font-family: sans-serif; color: #000; background: #fff; line-height: 1.3; font-size: 10pt; }');
@@ -203,7 +203,7 @@
             doc.write('svg, button, .no-print { display: none !important; }');
             doc.write('</style></head><body>');
             
-            doc.write('<div class="header"><div><h1>VetNova</h1><div style="font-size:14pt;font-weight:bold;">HISTORIA CLÍNICA OFICIAL</div></div><div style="font-size:8pt;text-align:right;"><b>Fecha:</b> ' + new Date().toLocaleString() + '</div></div>');
+            doc.write('<div class="header"><div><h1>VetNeoLink</h1><div style="font-size:14pt;font-weight:bold;">HISTORIA CLÍNICA OFICIAL</div></div><div style="font-size:8pt;text-align:right;"><b>Fecha:</b> ' + new Date().toLocaleString() + '</div></div>');
             doc.write(printContent);
             doc.write('</body></html>');
             doc.close();

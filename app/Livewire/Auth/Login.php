@@ -17,7 +17,7 @@ use Livewire\Component;
  * 5 intentos → bloqueo 15 minutos (por IP + email).
  */
 #[Layout('components.layouts.guest')]
-#[Title('Iniciar Sesión — VetNova')]
+#[Title('Iniciar Sesión — VetNeoLink')]
 class Login extends Component
 {
     #[Rule('required|email')]

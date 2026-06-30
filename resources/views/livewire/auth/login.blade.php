@@ -7,7 +7,7 @@
             wire:model="email"
             icon="o-envelope"
             type="email"
-            placeholder="admin@vetnova.pe"
+            placeholder="admin@vetneolink.pe"
             required
         />
 

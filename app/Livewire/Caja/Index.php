@@ -19,7 +19,7 @@ use Livewire\Component;
 use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
-#[Title('Caja y Facturación — VetNova')]
+#[Title('Caja y Facturación — VetNeoLink')]
 class Index extends Component
 {
     use AlertModal;

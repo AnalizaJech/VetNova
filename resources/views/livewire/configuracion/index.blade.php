@@ -36,7 +36,7 @@
                     <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mx-auto mb-3">
                         <x-icon name="o-heart" class="w-7 h-7 text-primary" />
                     </div>
-                    <h3 class="font-bold text-lg text-base-content">VetNova</h3>
+                    <h3 class="font-bold text-lg text-base-content">VetNeoLink</h3>
                     <p class="text-sm text-base-content/60 mt-1">Sistema de Gestión Veterinaria</p>
                     <div class="divider my-3"></div>
                     <div class="text-left space-y-2 text-sm">

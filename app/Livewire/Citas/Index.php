@@ -20,7 +20,7 @@ use Livewire\WithPagination;
 use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
-#[Title('Agenda de Citas — VetNova')]
+#[Title('Agenda de Citas — VetNeoLink')]
 class Index extends Component
 {
     use WithPagination, AlertModal;
@@ -231,7 +231,7 @@ class Index extends Component
         $cliente = $cita->cliente;
         if (!$cliente) return;
 
-        $msg = "Hola {$cliente->nombres}, recordatorio de cita para {$cita->mascota->nombre} el {$cita->fecha_hora->format('d/m/Y')} a las {$cita->fecha_hora->format('h:i A')}. Motivo: {$cita->motivo}. ¡Te esperamos en VetNova!";
+        $msg = "Hola {$cliente->nombres}, recordatorio de cita para {$cita->mascota->nombre} el {$cita->fecha_hora->format('d/m/Y')} a las {$cita->fecha_hora->format('h:i A')}. Motivo: {$cita->motivo}. ¡Te esperamos en VetNeoLink!";
 
         // WhatsApp
         if ($cliente->telefono) {
@@ -247,7 +247,7 @@ class Index extends Component
         if ($cliente->email) {
             $html = "
                 <div style='font-family: sans-serif; padding: 20px; color: #333;'>
-                    <h2 style='color: #4f46e5;'>Confirmación de Cita — VetNova</h2>
+                    <h2 style='color: #4f46e5;'>Confirmación de Cita — VetNeoLink</h2>
                     <p>Hola <strong>{$cliente->nombres}</strong>,</p>
                     <p>Se ha agendado una cita para <strong>{$cita->mascota->nombre}</strong>:</p>
                     <div style='background: #f3f4f6; padding: 15px; border-radius: 10px; margin: 20px 0;'>
@@ -258,7 +258,7 @@ class Index extends Component
                     <p>¡Te esperamos!</p>
                 </div>
             ";
-            $cita->notificado_email = $notifications->sendEmail($cliente->email, "Confirmación de Cita — VetNova", $html);
+            $cita->notificado_email = $notifications->sendEmail($cliente->email, "Confirmación de Cita — VetNeoLink", $html);
         }
 
         $cita->save();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket #{{ str_pad((string)$venta->id, 6, '0', STR_PAD_LEFT) }} - VetNova</title>
+    <title>Ticket #{{ str_pad((string)$venta->id, 6, '0', STR_PAD_LEFT) }} - VetNeoLink</title>
     <style>
         /* Reset y estilos base para ticketera térmica */
         body {
@@ -102,7 +102,7 @@
     <a href="{{ route('caja') }}" class="btn-volver no-print">← Volver a la Caja</a>
 
     <div class="header text-center">
-        <h1>VETNOVA</h1>
+        <h1>VETNEOLINK</h1>
         <p>{{ auth()->user()->clinica->nombre ?? 'Clínica Veterinaria' }}</p>
         <p>RUC: 20123456789</p> <!-- Ejemplo, luego se jala de la clinica -->
         <p>Tel: {{ auth()->user()->clinica->telefono ?? '---' }}</p>
@@ -165,7 +165,7 @@
             <br>
         @endif
         <p>¡Gracias por confiar en nosotros!</p>
-        <p>Software veterinario por VetNova.</p>
+        <p>Software veterinario por VetNeoLink.</p>
     </div>
 
 </body>

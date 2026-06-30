@@ -14,7 +14,7 @@ use Livewire\Component;
 use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
-#[Title('Hospitalización — VetNova')]
+#[Title('Hospitalización — VetNeoLink')]
 class Index extends Component
 {
     use AlertModal;

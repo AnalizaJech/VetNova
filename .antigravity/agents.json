@@ -1,0 +1,33 @@
+{
+  "project": "VetNova 2.0",
+  "version": "2.0.0",
+  "engine": "gemini-3.5-flash-preview",
+  "agents": [
+    {
+      "name": "backend-architect",
+      "role": "Elite Laravel Architect",
+      "description": "Handles database migrations, models, action classes, and complex business logic (NubeFact, PeruAPI).",
+      "focus": ["app/Models", "app/Actions", "database/migrations", "app/Services"],
+      "standards": ["SOLID", "KISS", "Strict Typing"]
+    },
+    {
+      "name": "frontend-stylist",
+      "role": "Senior UX/UI Designer & Livewire Expert",
+      "description": "Focuses on modern UI/UX using Tailwind CSS, Alpine.js, and Livewire components. Ensures premium SaaS aesthetics.",
+      "focus": ["resources/views", "app/Livewire", "public/css"],
+      "capabilities": ["Tailwind 3.4+", "wire:navigate", "Responsive Design"]
+    },
+    {
+      "name": "qa-automation",
+      "role": "QA Engineer",
+      "description": "Ensures zero regressions by writing and running Pest (unit/feature) and Playwright (E2E) tests.",
+      "focus": ["tests/Feature", "tests/Unit", "e2e"],
+      "triggers": ["post-commit", "pre-deployment"]
+    }
+  ],
+  "orchestration": {
+    "parallel_execution": true,
+    "memory_sync": true,
+    "workspace_rules": ".cursorrules"
+  }
+}

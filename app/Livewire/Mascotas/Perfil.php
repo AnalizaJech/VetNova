@@ -11,7 +11,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
-#[Title('Perfil del Paciente — VetNova')]
+#[Title('Perfil del Paciente — VetNeoLink')]
 class Perfil extends Component
 {
     public Mascota $mascota;

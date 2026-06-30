@@ -12,7 +12,7 @@ use Livewire\WithPagination;
 use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
-#[Title('Facturación e Historial — VetNova')]
+#[Title('Facturación e Historial — VetNeoLink')]
 class Index extends Component
 {
     use WithPagination;

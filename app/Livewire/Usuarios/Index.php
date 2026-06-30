@@ -22,7 +22,7 @@ use App\Traits\AlertModal;
  * Permite crear, editar, desactivar y asignar roles a usuarios de la clínica.
  */
 #[Layout('components.layouts.app')]
-#[Title('Gestión de Usuarios — VetNova')]
+#[Title('Gestión de Usuarios — VetNeoLink')]
 class Index extends Component
 {
     use WithPagination, AlertModal;

@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 @import 'tailwindcss';
 
-/* ── VetNova — Sistema de Gestión Veterinaria ── */
+/* ── VetNeoLink — Sistema de Gestión Veterinaria ── */
 
 /* ── Fuentes de paginación y vistas compiladas de Laravel ── */
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -17,9 +17,9 @@
 /* ── Plugin DaisyUI ── */
 @plugin "daisyui";
 
-/* ── Tema VetNova (Claro) ── */
+/* ── Tema VetNeoLink (Claro) ── */
 @plugin "daisyui/theme" {
-    name: "vetnova";
+    name: "vetneolink";
     default: true;
     prefersdark: false;
     color-scheme: light;
@@ -28,9 +28,9 @@
     /* ... resto de variables ... */
 }
 
-/* ── Tema VetNova Dark ── */
+/* ── Tema VetNeoLink Dark ── */
 @plugin "daisyui/theme" {
-    name: "vetnova-dark";
+    name: "vetneolink-dark";
     prefersdark: true;
     color-scheme: dark;
     --color-primary: #10B981;

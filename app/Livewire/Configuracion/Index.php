@@ -17,7 +17,7 @@ use App\Traits\AlertModal;
  * Solo accesible para administradores y super_admin.
  */
 #[Layout('components.layouts.app')]
-#[Title('Configuración — VetNova')]
+#[Title('Configuración — VetNeoLink')]
 class Index extends Component
 {
     use AlertModal;

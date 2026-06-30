@@ -14,7 +14,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
-#[Title('Reportes y Analíticas — VetNova')]
+#[Title('Reportes y Analíticas — VetNeoLink')]
 class Index extends Component
 {
     public array $chartVentas = [];

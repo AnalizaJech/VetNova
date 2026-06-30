@@ -16,7 +16,7 @@ use Livewire\WithPagination;
 use App\Traits\AlertModal;
 
 #[Layout('components.layouts.app')]
-#[Title('Catálogo e Inventario — VetNova')]
+#[Title('Catálogo e Inventario — VetNeoLink')]
 class Index extends Component
 {
     use WithPagination, AlertModal;

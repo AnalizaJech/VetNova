@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="VetNova — Sistema de Gestión Veterinaria">
+    <meta name="description" content="VetNeoLink — Sistema de Gestión Veterinaria">
 
-    <title>{{ $title ?? 'VetNova' }}</title>
+    <title>{{ $title ?? 'VetNeoLink' }}</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><path d='M19 10.5h-5.5V5a1.5 1.5 0 0 0-3 0v5.5H5a1.5 1.5 0 0 0 0 3h5.5V19a1.5 1.5 0 0 0 3 0v-5.5H19a1.5 1.5 0 0 0 0-3z'/></svg>">
@@ -43,7 +43,7 @@
                     <x-icon name="o-heart" class="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold font-heading tracking-tight">VetNova</h1>
+                    <h1 class="text-lg font-bold font-heading tracking-tight">VetNeoLink</h1>
                     <p class="text-xs text-neutral-content/60">Gestión Veterinaria</p>
                 </div>
             </div>

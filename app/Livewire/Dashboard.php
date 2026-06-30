@@ -15,7 +15,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
-#[Title('Dashboard — VetNova')]
+#[Title('Dashboard — VetNeoLink')]
 class Dashboard extends Component
 {
     public function render()

@@ -88,7 +88,7 @@ class NotificationService
     {
         try {
             Resend::emails()->send([
-                'from' => 'VetNova <onboarding@resend.dev>',
+                'from' => 'VetNeoLink <onboarding@resend.dev>',
                 'to' => [$to],
                 'subject' => $subject,
                 'html' => $html,
